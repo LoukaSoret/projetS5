@@ -25,6 +25,9 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 
 struct memory_data {
+    int size;
+    int endianess;
+    uint32_t *data;
 };
 
 memory memory_create(size_t size, int is_big_endian) {
