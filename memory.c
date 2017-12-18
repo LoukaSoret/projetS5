@@ -32,6 +32,7 @@ struct memory_data {
     
 };
 
+//hello
 memory memory_create(size_t size, int is_big_endian) {
     memory mem;
     uint8_t *data = malloc(size*sizeof(uint8_t));
