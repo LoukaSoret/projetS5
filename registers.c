@@ -32,12 +32,13 @@ struct registers_data {
 };
 
 registers registers_create() {
-    registers r = NULL;
+    registers r = malloc(sizeof(uint32_t)*18);
+    r->mode = 0; 
     return r;
 }
 
 void registers_destroy(registers r) {
- 	r = NULL;
+ 	free(r);
 }
 
 uint8_t get_mode(registers r) {
