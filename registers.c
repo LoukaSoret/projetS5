@@ -32,7 +32,7 @@ struct registers_data {
 };
 
 registers registers_create() {
-    registers r = malloc(sizeof(uint32_t)*18);
+    registers r = malloc(sizeof(uint32_t)*18+sizeof(uint8_t));
     r->mode = 16; 
     return r;
 }
