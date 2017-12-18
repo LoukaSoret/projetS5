@@ -21,6 +21,7 @@ Contact: Guillaume.Huard@imag.fr
 	 38401 Saint Martin d'Hères
 */
 #include <stdlib.h>
+#include <stdio.h>
 #include "memory.h"
 #include "util.h"
 
@@ -32,37 +33,104 @@ struct memory_data {
 };
 
 memory memory_create(size_t size, int is_big_endian) {
-    memory mem=NULL;
+    memory mem;
+    uint8_t *data = malloc(size*sizeof(uint8_t));
+    mem = (memory) malloc(sizeof(struct memory_data));
+    if(mem == NULL || data == NULL){        
+        fprintf(stderr, "Error when creating simulated memory\n");
+        exit(1);
+    }
+    mem->data = data;
+    mem->size = size;
+    mem->endianess = is_big_endian;
     return mem;
 }
 
 size_t memory_get_size(memory mem) {
-    return 0;
+    return mem->size;
 }
 
 void memory_destroy(memory mem) {
+    free(mem->data);
+    mem->size=0;
+    mem->endianess=0;
+    free(mem);
 }
 
 int memory_read_byte(memory mem, uint32_t address, uint8_t *value) {
+    if(address >= 0 && address < mem->size){
+        *value = mem->data[address];
+        return 0;
+    }
     return -1;
 }
 
 int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
-    return -1;
+    uint8_t frst_half;
+    uint8_t scnd_half;
+    int ctrl1,ctrl2;
+    ctrl1 = memory_read_byte(mem,address,&frst_half);
+    ctrl2 = memory_read_byte(mem,address+1,&scnd_half);
+    if (ctrl1 || ctrl2){
+        return -1;
+    }
+    if(mem->endianess){
+        *value = (uint16_t)((((uint16_t) frst_half)<<8) | scnd_half);
+    }
+    else{
+        *value = (uint16_t)((((uint16_t) scnd_half)<<8) | frst_half);
+    }
+    return 0;
 }
 
 int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
-    return -1;
+    uint16_t frst_half ;
+    uint16_t scnd_half;
+    int ctrl1,ctrl2;
+    ctrl1 = memory_read_half(mem,address,&frst_half);
+    ctrl2 = memory_read_half(mem,address+2,&scnd_half);
+    if (ctrl1 || ctrl2){
+        return -1;
+    }
+    if(mem->endianess){
+        *value = (uint32_t)((((uint32_t) frst_half)<<16) | scnd_half);
+    }
+    else{
+        *value = (uint32_t)((((uint32_t) scnd_half)<<16) | frst_half);
+    }
+    return 0;
 }
 
 int memory_write_byte(memory mem, uint32_t address, uint8_t value) {
+    if(address >= 0 && address < mem->size){
+        mem->data[address]=value;
+        return 0;
+    }
     return -1;
 }
 
 int memory_write_half(memory mem, uint32_t address, uint16_t value) {
-    return -1;
+    int res;
+    if(mem->endianess){
+        res = memory_write_byte(mem,address,((uint8_t)((value >> 8) & 0xff)));
+        res |= memory_write_byte(mem,address+1,((uint8_t)((value) & 0xff)));
+    }
+    else{
+        res = memory_write_byte(mem,address,((uint8_t)((value) & 0xff)));
+        res |= memory_write_byte(mem,address+1,((uint8_t)((value >> 8) & 0xff)));   
+    }
+    return res;
 }
 
 int memory_write_word(memory mem, uint32_t address, uint32_t value) {
-    return -1;
+    int res;
+    if(mem->endianess){
+        res = memory_write_half(mem,address,((uint16_t)((value>>16) & 0xffff)));
+        res |= memory_write_half(mem,address+2,(uint16_t)((value) & 0xffff));
+    }
+    else{
+        res = memory_write_half(mem,address,(uint16_t)((value) & 0xffff));
+        res |= memory_write_half(mem,address+2,((uint16_t)((value>>16) & 0xffff)));
+    }
+    return res;
 }

@@ -43,8 +43,9 @@ int compare(void *a, void *b, size_t size, int reverse) {
         j_step = 1;
     }
     for (i=0; i<size; i++, j+=j_step)
-        if (*((uint8_t *) a + i) != *((uint8_t *) b + j))
+        if (*((uint8_t *) a + i) != *((uint8_t *) b + j)){
             return 0;
+        }
     return 1;
 }
 
@@ -61,8 +62,9 @@ int compare_with_sim(void *a, memory m, size_t size, int reverse) {
     }
     for (i=0; i<size; i++, j+=j_step) {
         memory_read_byte(m, j, &value);
-        if (*((uint8_t *) a + i) != value)
+        if (*((uint8_t *) a + i) != value){
             return 0;
+        }
     }
     return 1;
 }
