@@ -28,6 +28,7 @@ struct memory_data {
     int size;
     int endianess;
     uint8_t *data;
+	
 };
 
 memory memory_create(size_t size, int is_big_endian) {
