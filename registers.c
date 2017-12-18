@@ -33,7 +33,7 @@ struct registers_data {
 
 registers registers_create() {
     registers r = malloc(sizeof(uint32_t)*18);
-    r->mode = 0; 
+    r->mode = 16; 
     return r;
 }
 
@@ -46,7 +46,7 @@ uint8_t get_mode(registers r) {
 } 
 
 int current_mode_has_spsr(registers r) {
-	if (r->mode == 0 || r->mode == 6){
+	if (r->mode == 16 || r->mode == 31){
     return 0;
    }
    else{
@@ -55,7 +55,7 @@ int current_mode_has_spsr(registers r) {
 }
 
 int in_a_privileged_mode(registers r) {
-    if (r->mode == 0){
+    if (r->mode == 16){
     return 0;
    }
    else{
@@ -99,5 +99,7 @@ void write_cpsr(registers r, uint32_t value) {
 }
 
 void write_spsr(registers r, uint32_t value) {
-	r->reg_no[17] = value;
+	if(current_mode_has_spsr(r)){
+		r->reg_no[17] = value;
+	}
 }
