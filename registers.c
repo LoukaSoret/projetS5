@@ -25,6 +25,7 @@ Contact: Guillaume.Huard@imag.fr
 #include <stdlib.h>
 
 struct registers_data {
+    uint32_t value;
 };
 
 registers registers_create() {
