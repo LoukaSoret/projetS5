@@ -40,15 +40,23 @@ void memory_destroy(memory mem) {
 }
 
 int memory_read_byte(memory mem, uint32_t address, uint8_t *value) {
+    if(address >= 0 && address < mem.size){
+        *value = mem.data[address];
+        return 0;
+    }
     return -1;
 }
 
 int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
-    return -1;
+    memory_read_byte(mem,address,(uint8_t *)(value>>sizeof(uint8_t)));
+    memory_read_byte(mem,address+1,(uint8_t *)(value<<sizeof(uint8_t)));
+    return 0;
 }
 
 int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
-    return -1;
+    memory_read_half(mem,address,(uint8_t *)(value>>sizeof(uint16_t)));
+    memory_read_half(mem,address+1,(uint8_t *)(value<<sizeof(uint16_t)));
+    return 0;
 }
 
 int memory_write_byte(memory mem, uint32_t address, uint8_t value) {
