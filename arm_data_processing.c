@@ -39,50 +39,79 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
 
 // Instructions de traitement de données
 
-int and_processing(uint8_t reg1,uint8_t reg2){
+void and_processing(arm_core p,uint8_t reg1,uint8_t reg2){
    
    //Rd := Rn AND shifter_operand
-   reg1=reg1 & reg2 ;
+   uint32_t result;
+
+   result= arm_read_usr_register(p,reg1) & arm_read_usr_register(p,reg2);
+           arm_write_usr_register(p,reg1, result);
+
+
 
 }
 
-int sub_processing(uint8_t reg1,uint8_t reg2){
+void sub_processing(arm_core p,uint8_t reg1,uint8_t reg2){
     
     //Rd := Rn - shifter_operand
-    reg1=reg1 - reg2;
+
+   uint32_t result;
+
+   result= arm_read_usr_register(p,reg1) - arm_read_usr_register(p,reg2);
+           arm_write_usr_register(p,reg1, result);
 }
 
-int add_processing(uint8_t reg1,uint8_t reg2){
+void add_processing(arm_core p,uint8_t reg1,uint8_t reg2){
 	
 	//Rd := Rn + shifter_operand
-	reg1=reg1 + reg2;
+	
+   uint32_t result;
+
+   result= arm_read_usr_register(p,reg1) + arm_read_usr_register(p,reg2);
+           arm_write_usr_register(p,reg1, result);
 }
 
-int eor_processing(uint8_t reg1,uint8_t reg2){
+void eor_processing(arm_core p,uint8_t reg1,uint8_t reg2){
 	
 	//Rd := Rn EOR shifter_operand
 
-	reg1=reg1 ^ reg2;
+	uint32_t result;
+
+   result= arm_read_usr_register(p,reg1) ^ arm_read_usr_register(p,reg2);
+           arm_write_usr_register(p,reg1, result);
 
 }
 
 
-int rsb_processing(uint8_t reg1,uint8_t reg2){
+void rsb_processing(arm_core p,uint8_t reg1,uint8_t reg2){
 
 	//Rd := shifter_operand - Rn
-	reg1=reg2 - reg1;
+
+   uint32_t result;
+
+   result= arm_read_usr_register(p,reg2) - arm_read_usr_register(p,reg1);
+   arm_write_usr_register(p,reg1, result);
+
 }
 
-int adc_processing(uint8_t reg1,uint8_t reg2,uint8_t regflag){
+void adc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
 
 	//Rd := Rn + shifter_operand + Carry Flag
-	reg1=reg1 - reg2 + regflag;
+	add_processing(p,reg1,reg2);
+	add_processing(p,reg1,regflag);
 }
 
-int sbc_processing(uint8_t reg1,uint8_t reg2,uint8_t regflag){
+int sbc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
 
 	//Rd := Rn - shifter_operand - NOT(Carry Flag)
-	reg1=reg1 - reg2 - (!regflag);
+	uint32_t notflag,result;
+	sub_processing(p,reg1,reg2);
+
+	result= arm_read_usr_register(p,reg1) - !(arm_read_cpsr(p));
+	arm_write_usr_register(p,reg1, result);
+	
+
+	
 }
 
 int rsc_processing(uint8_t reg1,uint8_t reg2,uint8_t regflag){
