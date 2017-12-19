@@ -1,24 +1,24 @@
 /*
-Armator - simulateur de jeu d'instruction ARMv5T à but pédagogique
+Armator - simulateur de jeu d'instruction ARMv5T Ã  but pÃ©dagogique
 Copyright (C) 2011 Guillaume Huard
 Ce programme est libre, vous pouvez le redistribuer et/ou le modifier selon les
-termes de la Licence Publique Générale GNU publiée par la Free Software
-Foundation (version 2 ou bien toute autre version ultérieure choisie par vous).
+termes de la Licence Publique GÃ©nÃ©rale GNU publiÃ©e par la Free Software
+Foundation (version 2 ou bien toute autre version ultÃ©rieure choisie par vous).
 
-Ce programme est distribué car potentiellement utile, mais SANS AUCUNE
+Ce programme est distribuÃ© car potentiellement utile, mais SANS AUCUNE
 GARANTIE, ni explicite ni implicite, y compris les garanties de
-commercialisation ou d'adaptation dans un but spécifique. Reportez-vous à la
-Licence Publique Générale GNU pour plus de détails.
+commercialisation ou d'adaptation dans un but spÃ©cifique. Reportez-vous Ã  la
+Licence Publique GÃ©nÃ©rale GNU pour plus de dÃ©tails.
 
-Vous devez avoir reçu une copie de la Licence Publique Générale GNU en même
-temps que ce programme ; si ce n'est pas le cas, écrivez à la Free Software
+Vous devez avoir reÃ§u une copie de la Licence Publique GÃ©nÃ©rale GNU en mÃªme
+temps que ce programme ; si ce n'est pas le cas, Ã©crivez Ã  la Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
-États-Unis.
+Ã‰tats-Unis.
 
 Contact: Guillaume.Huard@imag.fr
-	 Bâtiment IMAG
+	 BÃ¢timent IMAG
 	 700 avenue centrale, domaine universitaire
-	 38401 Saint Martin d'Hères
+	 38401 Saint Martin d'HÃ¨res
 */
 #include "arm_load_store.h"
 #include "arm_exception.h"
@@ -31,7 +31,56 @@ int arm_load_store(arm_core p, uint32_t ins) {
 }
 
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
-    
+	uint32_t *adr = NULL; 
+    if(get_bit(ins,20)){ //Cas du load
+    	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),adr);
+    	if(get_bit(ins,23)){ // U == 1 , on remonte les adresses
+    		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
+    			adr--;
+    		}
+	    	for(uint8_t i=15;i>=0;i--){
+	    		if(get_bit(ins,i)){
+	    			arm_write_register(p,i,*adr);
+	    			adr--;
+	    		}
+	    	}
+    	}else{
+    		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
+    			adr++;
+    		}
+	    	for(uint8_t i=15;i>=0;i--){
+	    		if(get_bit(ins,i)){
+	    			arm_write_register(p,i,*adr);
+	    			adr++;
+	    		}
+	    	}
+    	}
+    }else{ // Cas du store
+    	uint32_t *adr = NULL; 
+    	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),adr);
+    	if(get_bit(ins,23)){ // U == 1 , on remonte les adresses
+    		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
+    			adr--;
+    		}
+	    	for(uint8_t i=15;i>=0;i--){
+	    		if(get_bit(ins,i)){
+	    			*adr = arm_read_register(p,i);
+	    			adr--;
+	    		}
+	    	}
+    	}else{
+    		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
+    			adr++;
+    		}
+	    	for(uint8_t i=15;i>=0;i--){
+	    		if(get_bit(ins,i)){
+	    			*adr = arm_read_register(p,i);
+	    			adr++;
+	    		}
+	    	}
+    	}
+    }
+    return 0;
 }
 
 int arm_coprocessor_load_store(arm_core p, uint32_t ins) {
