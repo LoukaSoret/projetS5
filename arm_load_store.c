@@ -56,7 +56,6 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    	}
     	}
     }else{ // Cas du store
-    	uint32_t *adr = NULL; 
     	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),adr);
     	if(get_bit(ins,23)){ // U == 1 , on remonte les adresses
     		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
