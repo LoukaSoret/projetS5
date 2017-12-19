@@ -101,10 +101,10 @@ void adc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
 	add_processing(p,reg1,regflag);
 }
 
-int sbc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
+void sbc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
 
 	//Rd := Rn - shifter_operand - NOT(Carry Flag)
-	uint32_t notflag,result;
+	uint32_t result;
 	sub_processing(p,reg1,reg2);
 
 	result= arm_read_usr_register(p,reg1) - !(arm_read_cpsr(p));
@@ -114,57 +114,60 @@ int sbc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
 	
 }
 
-int rsc_processing(uint8_t reg1,uint8_t reg2,uint8_t regflag){
+void rsc_processing(uint8_t reg1,uint8_t reg2,uint8_t regflag){
 
 	//Rd := shifter_operand - Rn - NOT(Carry Flag)
-	reg1=reg2 - reg1 - (!regflag);
+	uint32_t result;
+	rsb_processing(p,reg1,reg2);
+	result= arm_read_usr_register(p,reg1) - !(arm_read_cpsr(p));
+	arm_write_usr_register(p,reg1, result);
 }
 
-int tst_processing(uint8_t regflag,int flag){
+void tst_processing(uint8_t regflag,int flag){
 
 	//Update flags after Rn AND shifter_operand
-	regflag=flag;
+	
 }
 
-int teq_processing(uint8_t regflag,int flag){
+void teq_processing(uint8_t regflag,int flag){
 
 	//Update flags after Rn EOR shifter_operand
-	regflag=flag;
+	
 }
 
-int cmp_processing(uint8_t regflag,int flag){
+void cmp_processing(uint8_t regflag,int flag){
 
 	//Update flags after Rn - shifter_operand
-	regflag=flag;
+	
 }
 
-int cmn_processing(uint8_t regflag,int flag){
+void cmn_processing(uint8_t regflag,int flag){
 
 	//Update flags after Rn + shifter_operand
-	regflag=flag;
+	
 }
 
-int orr_processing(uint8_t regflag,int flag){
+void orr_processing(uint8_t regflag,int flag){
 
 	//Logical (inclusive) OR Rd := Rn OR shifter_operand
 }
 
-int mov_processing(uint8_t reg1,uint8_t reg2){
+void mov_processing(uint8_t reg1,uint8_t reg2){
 	
 	//Rd := shifter_operand (no first operand)
-	reg1=reg2;
+	
 }
 
-int bic_processing(){
+void bic_processing(){
 
 	//Bit Clear Rd := Rn AND NOT(shifter_operand)
-	reg1=reg1 & (!reg2);
+	
 }
 
-int mvn_processing(){
+void mvn_processing(){
 
 	//Move Not Rd := NOT shifter_operand (no first operand)
-	reg1=(!reg2);
+	
 }
 
 
