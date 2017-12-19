@@ -29,79 +29,149 @@ Contact: Guillaume.Huard@imag.fr
 
 /* Decoding functions for different classes of instructions */
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
-    return UNDEFINED_INSTRUCTION;
-}
-
-int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
-    int r1, r2, opcode;
+   int r1, r2, opcode, value, s;
     
     opcode = get_bits(ins, 24, 21);
     r1 = get_bits(ins, 19, 16);
     r2 = get_bits(ins, 15, 12);
+    rm = get_bits(ins, 3, 0);
+    s = get_bit(20);
+    shift = get_bits(11, 4);
     
     switch(opcode){
     	case 0 :
-    		and(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return and_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 1 :
-    		eor(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return eor_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 2 :
-    		sub(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return sub_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 3 :
-    		rsb(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return rsb_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
-    		
+    	
     	case 4 :
-    		add(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return add_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 5 :
-    		adc(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return adc_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 6 :
-    		sbc(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return sbc_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 7 :
-    		rsc(p->reg->reg_no[r1], p->reg->reg_no[r2]);
-    		break;
-    		
-    	case 8 :
-    		tst(p->reg->reg_no[r1], p->reg->reg_no[r2]);
-    		break;
-    		
-    	case 9 :
-    		teq(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return rsc_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 10 :
-    		cmp(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return cmp_s(p->reg->reg_no[r1], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 11 :
-    		cmn(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return cmn_s(p->reg->reg_no[r1], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 12 :
-    		orr(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return orr_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 13 :
-    		mov(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return mov_s(p->reg->reg_no[r2], shift, p->reg->reg_no[rm]);
     		break;
     		
     	case 14 :
-    		bic(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return bic_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
     		break;
     		
     	case 15 :
-    		mvn(p->reg->reg_no[r1], p->reg->reg_no[r2]);
+    		return mvn_s(p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		break;
+    		
+    	default:
+    		break;
+    }
+}
+
+int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
+    int r1, r2, opcode, value, s;
+    
+    opcode = get_bits(ins, 24, 21);
+    r1 = get_bits(ins, 19, 16);
+    r2 = get_bits(ins, 15, 12);
+    value = get_bits(ins, 7, 0);
+    s = get_bit(20);
+    
+    switch(opcode){
+    	case 0 :
+    		return and(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 1 :
+    		return eor(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 2 :
+    		sub(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 3 :
+    		rsb(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 4 :
+    		add(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 5 :
+    		adc(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 6 :
+    		sbc(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 7 :
+    		rsc(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 8 :
+    		tst(p->reg->reg_no[r1], value, s);
+    		break;
+    		
+    	case 9 :
+    		teq(p->reg->reg_no[r1], value, s);
+    		break;
+    		
+    	case 10 :
+    		cmp(p->reg->reg_no[r1], value, s);
+    		break;
+    		
+    	case 11 :
+    		cmn(p->reg->reg_no[r1], value, s);
+    		break;
+    		
+    	case 12 :
+    		orr(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 13 :
+    		mov(p->reg->reg_no[r2], value);
+    		break;
+    		
+    	case 14 :
+    		bic(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		break;
+    		
+    	case 15 :
+    		mvn(p->reg->reg_no[r2], value, s);
     		break;
     		
     	default:
