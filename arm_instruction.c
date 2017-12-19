@@ -29,8 +29,8 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 
 static int arm_execute_instruction(arm_core p) {
-    int32_t instruction,error,;
-    error = arm_fetch(arm_core p, &instruction);
+    uint32_t instruction,error;
+    error = arm_fetch(p, &instruction);
     if(error){
     	printf("Erreur lors du fetch en memoire de l'istruction courante.\n");
     	return 1;
@@ -50,7 +50,7 @@ static int arm_execute_instruction(arm_core p) {
     					}
     					else{
     						/* Data processing register/immediate shift */
-    						arm_data_processing_shift(arm_core p, uint32_t ins);
+    						arm_data_processing_shift(p, instruction);
     					}
     					break;
     			}
