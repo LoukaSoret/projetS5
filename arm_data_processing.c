@@ -29,152 +29,302 @@ Contact: Guillaume.Huard@imag.fr
 
 /* Decoding functions for different classes of instructions */
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
-   int r1, r2, opcode, value, s;
+   int cond, rn, rd, opcode, s, shift, val_shift;
     
+    cond = get_bits(ins, 31, 28);
     opcode = get_bits(ins, 24, 21);
-    r1 = get_bits(ins, 19, 16);
-    r2 = get_bits(ins, 15, 12);
-    rm = get_bits(ins, 3, 0);
-    s = get_bit(20);
-    shift = get_bits(11, 4);
+    s = get_bit(ins, 20);
+    rn = get_bits(ins, 19, 16);
+    rd = get_bits(ins, 15, 12);
+    sh = get_bits(ins, 11, 0);
     
-    switch(opcode){
+    val_shift = shift(p, sh);
+    
+    if(condition(cond)){
+    	switch(opcode){
     	case 0 :
-    		return and_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		and_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 1 :
-    		return eor_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		eor_processing(rn,rd, val_sh, s);
     		break;
     		
     	case 2 :
-    		return sub_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		sub_processing(rn,rd, val_sh, s);
     		break;
     		
     	case 3 :
-    		return rsb_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		rsb_processing(rn, rd, val_sh, s);
     		break;
     	
     	case 4 :
-    		return add_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		add_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 5 :
-    		return adc_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		adc_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 6 :
-    		return sbc_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		sbc_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 7 :
-    		return rsc_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		rsc_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 10 :
-    		return cmp_s(p->reg->reg_no[r1], shift, p->reg->reg_no[rm], s);
+    		cmp_processing(rn, val_sh, s);
     		break;
     		
     	case 11 :
-    		return cmn_s(p->reg->reg_no[r1], shift, p->reg->reg_no[rm], s);
+    		cmn_processing(rn, val_sh, s);
     		break;
     		
     	case 12 :
-    		return orr_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		orr_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 13 :
-    		return mov_s(p->reg->reg_no[r2], shift, p->reg->reg_no[rm]);
+    		mov_processing(rd, val_sh, s);
     		break;
     		
     	case 14 :
-    		return bic_s(p->reg->reg_no[r1], p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		bic_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 15 :
-    		return mvn_s(p->reg->reg_no[r2], shift, p->reg->reg_no[rm], s);
+    		mvn_processing(rd, val_sh, s);
     		break;
     		
     	default:
     		break;
     }
+   }
+   return 0;
 }
 
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
-    int r1, r2, opcode, value, s;
+    int rn, rd, opcode, value, s, rotation, val_sh, cond;
     
+    cond = get_bits(ins, 31, 28);
     opcode = get_bits(ins, 24, 21);
-    r1 = get_bits(ins, 19, 16);
-    r2 = get_bits(ins, 15, 12);
+    rn = get_bits(ins, 19, 16);
+    rd = get_bits(ins, 15, 12);
+    rotation = get_bits(ins, 11, 8);
     value = get_bits(ins, 7, 0);
-    s = get_bit(20);
+    s = get_bit(ins, 20);
     
-    switch(opcode){
+    val_sh = ror(value, rotation);
+    
+    if(condition(cond)){
+    	switch(opcode){
     	case 0 :
-    		return and(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		and_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 1 :
-    		return eor(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		eor_processing(rn,rd, val_sh, s);
     		break;
     		
     	case 2 :
-    		sub(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		sub_processing(rn,rd, val_sh, s);
     		break;
     		
     	case 3 :
-    		rsb(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		rsb_processing(rn, rd, val_sh, s);
     		break;
-    		
+    	
     	case 4 :
-    		add(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		add_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 5 :
-    		adc(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		adc_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 6 :
-    		sbc(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		sbc_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 7 :
-    		rsc(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		rsc_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 8 :
-    		tst(p->reg->reg_no[r1], value, s);
+    		tst(rn, val_sh, s);
     		break;
     		
     	case 9 :
-    		teq(p->reg->reg_no[r1], value, s);
+    		teq(rn, val_sh, s);
     		break;
     		
     	case 10 :
-    		cmp(p->reg->reg_no[r1], value, s);
+    		cmp_processing(rn, val_sh, s);
     		break;
     		
     	case 11 :
-    		cmn(p->reg->reg_no[r1], value, s);
+    		cmn_processing(rn, val_sh, s);
     		break;
     		
     	case 12 :
-    		orr(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		orr_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 13 :
-    		mov(p->reg->reg_no[r2], value);
+    		mov_processing(rd, val_sh, s);
     		break;
     		
     	case 14 :
-    		bic(p->reg->reg_no[r1], p->reg->reg_no[r2], value, s);
+    		bic_processing(rn, rd, val_sh, s);
     		break;
     		
     	case 15 :
-    		mvn(p->reg->reg_no[r2], value, s);
+    		mvn_processing(rd, val_sh, s);
     		break;
     		
     	default:
     		break;
     }
+   }
+   return 0;
 }
+
+// Instructions de traitement de données
+
+void and_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+   
+   //Rd := Rn AND shifter_operand
+   uint32_t result;
+
+   result= arm_read_usr_register(p,reg1) & arm_read_usr_register(p,reg2);
+           arm_write_usr_register(p,reg1, result);
+
+
+
+}
+
+void sub_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+    
+    //Rd := Rn - shifter_operand
+
+   uint32_t result;
+
+   result= arm_read_usr_register(p,reg1) - arm_read_usr_register(p,reg2);
+           arm_write_usr_register(p,reg1, result);
+}
+
+void add_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+	
+	//Rd := Rn + shifter_operand
+	
+   uint32_t result;
+
+   result= arm_read_usr_register(p,reg1) + arm_read_usr_register(p,reg2);
+           arm_write_usr_register(p,reg1, result);
+}
+
+void eor_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+	
+	//Rd := Rn EOR shifter_operand
+
+	uint32_t result;
+
+   result= arm_read_usr_register(p,reg1) ^ arm_read_usr_register(p,reg2);
+           arm_write_usr_register(p,reg1, result);
+
+}
+
+
+void rsb_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+
+	//Rd := shifter_operand - Rn
+
+   uint32_t result;
+
+   result= arm_read_usr_register(p,reg2) - arm_read_usr_register(p,reg1);
+   arm_write_usr_register(p,reg1, result);
+
+}
+
+void adc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
+
+	//Rd := Rn + shifter_operand + Carry Flag
+	add_processing(p,reg1,reg2);
+	add_processing(p,reg1,regflag);
+}
+
+void sbc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
+
+	//Rd := Rn - shifter_operand - NOT(Carry Flag)
+	uint32_t result;
+	sub_processing(p,reg1,reg2);
+
+	result= arm_read_usr_register(p,reg1) - !(arm_read_cpsr(p));
+	arm_write_usr_register(p,reg1, result);
+	
+
+	
+}
+
+void rsc_processing(uint8_t reg1,uint8_t reg2,uint8_t regflag){
+
+	//Rd := shifter_operand - Rn - NOT(Carry Flag)
+	uint32_t result;
+	rsb_processing(p,reg1,reg2);
+	result= arm_read_usr_register(p,reg1) - !(arm_read_cpsr(p));
+	arm_write_usr_register(p,reg1, result);
+}
+
+void tst_processing(uint8_t regflag,int flag){
+
+	//Update flags after Rn AND shifter_operand
+	
+}
+
+void teq_processing(uint8_t regflag,int flag){
+
+	//Update flags after Rn EOR shifter_operand
+	
+}
+
+void cmp_processing(uint8_t regflag,int flag){
+
+	//Update flags after Rn - shifter_operand
+	
+}
+
+void cmn_processing(uint8_t regflag,int flag){
+
+	//Update flags after Rn + shifter_operand
+	
+}
+
+void orr_processing(uint8_t regflag,int flag){
+
+	//Logical (inclusive) OR Rd := Rn OR shifter_operand
+}
+
+void mov_processing(uint8_t reg1,uint8_t reg2){
+	
+	//Rd := shifter_operand (no first operand)
+	
+}
+
+void bic_processing(){
+
+	//Bit Clear Rd := Rn AND NOT(shifter_operand)
+	
+}
+
+void mvn_processing(){
+
+	//Move Not Rd := NOT shifter_operand (no first operand)
+	
+}
+
+
+
+
+
