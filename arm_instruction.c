@@ -47,6 +47,7 @@ static int arm_execute_instruction(arm_core p) {
     					if (get_bit(instruction,4) && get_bit(instruction,7)){
     						/* Multiplies: See Figure A3-3
 							   Extra load/stores: See Figure A3-5 */
+    						arm_load_store(p, instruction);
     					}
     					else{
     						/* Data processing register/immediate shift */
