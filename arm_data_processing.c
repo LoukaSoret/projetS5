@@ -37,137 +37,205 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
     return UNDEFINED_INSTRUCTION;
 }
 
-// Instructions de traitement de données
 
-void and_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+
+uint16_t imm;                        //séquence contenant rotationimmediate
+uint8_t rotate=get_bits(imm,11,8);   //valeur de la rotation
+uint8_t immediate=get_bits(imm,7,0); //valeur de immediate
+
+
+
+void and(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
    
    //Rd := Rn AND shifter_operand
-   uint32_t result;
+	uint32_t result;
+	
+	result= arm_read_usr_register(p,rn) & (immed << rotate);
+           arm_write_usr_register(p,rd, result);
 
-   result= arm_read_usr_register(p,reg1) & arm_read_usr_register(p,reg2);
-           arm_write_usr_register(p,reg1, result);
+	if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
+	{
+       //  arm_write_cpsr(p, value)
 
-
+	} 
 
 }
 
-void sub_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+void sub(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
     
     //Rd := Rn - shifter_operand
+    uint32_t result;
+    result= arm_read_usr_register(p,rn) - (immed << rotate);
+           arm_write_usr_register(p,rd, result);
 
-   uint32_t result;
+        if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
+	{
+        // arm_write_cpsr(p, value)
 
-   result= arm_read_usr_register(p,reg1) - arm_read_usr_register(p,reg2);
-           arm_write_usr_register(p,reg1, result);
+	} 
 }
 
-void add_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+void add(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 	
 	//Rd := Rn + shifter_operand
-	
-   uint32_t result;
+	uint32_t result;
+ 
+    result= arm_read_usr_register(p,rn) + (immed << rotate);
+           arm_write_usr_register(p,rd, result);
 
-   result= arm_read_usr_register(p,reg1) + arm_read_usr_register(p,reg2);
-           arm_write_usr_register(p,reg1, result);
+            if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
+	{
+         //arm_write_cpsr(p, value)
+
+	} 
 }
 
-void eor_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+void eor(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 	
 	//Rd := Rn EOR shifter_operand
 
 	uint32_t result;
 
-   result= arm_read_usr_register(p,reg1) ^ arm_read_usr_register(p,reg2);
-           arm_write_usr_register(p,reg1, result);
+   result= arm_read_usr_register(p,rn) ^ (immed << rotate);
+           arm_write_usr_register(p,rd, result);
+
+            if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
+	{
+         //arm_write_cpsr(p, value)
+
+	} 
 
 }
 
 
-void rsb_processing(arm_core p,uint8_t reg1,uint8_t reg2){
+void rsb(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Rd := shifter_operand - Rn
 
    uint32_t result;
 
-   result= arm_read_usr_register(p,reg2) - arm_read_usr_register(p,reg1);
-   arm_write_usr_register(p,reg1, result);
+   result= (immed << rotate) - arm_read_usr_register(p,rn);
+           arm_write_usr_register(p,rd, result);
+
+           if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
+	{
+         //arm_write_cpsr(p, value)
+
+	} 
 
 }
 
-void adc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
+void adc(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Rd := Rn + shifter_operand + Carry Flag
-	add_processing(p,reg1,reg2);
-	add_processing(p,reg1,regflag);
+	uint32_t result;
+
+	result= arm_read_usr_register(p,rn) + (immed << rotate) + read_C(p);
+            arm_write_usr_register(p,rd, result);
+
+             if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
+	{
+         //arm_write_cpsr(p, value)
+
+	} 
 }
 
-void sbc_processing(arm_core p,uint8_t reg1,uint8_t reg2,uint8_t regflag){
+void sbc(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Rd := Rn - shifter_operand - NOT(Carry Flag)
 	uint32_t result;
-	sub_processing(p,reg1,reg2);
-
-	result= arm_read_usr_register(p,reg1) - !(arm_read_cpsr(p));
-	arm_write_usr_register(p,reg1, result);
+		
+		result= arm_read_usr_register(p,rn) - (immed << rotate) - (~(read_C(p));
+	            arm_write_usr_register(p,rd, result);
 	
+	 if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
+	{
+         //arm_write_cpsr(p, value)
+
+	} 
 
 	
 }
 
-void rsc_processing(uint8_t reg1,uint8_t reg2,uint8_t regflag){
+void rsc(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Rd := shifter_operand - Rn - NOT(Carry Flag)
 	uint32_t result;
-	rsb_processing(p,reg1,reg2);
-	result= arm_read_usr_register(p,reg1) - !(arm_read_cpsr(p));
-	arm_write_usr_register(p,reg1, result);
+
+	result= (immed << rotate) - arm_read_usr_register(p,rn) - (~(read_C(p));
+	     arm_write_usr_register(p,rd, result);
+
+	     if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
+	{
+         //arm_write_cpsr(p, value)
+
+	} 
+	
 }
 
-void tst_processing(uint8_t regflag,int flag){
+void tst(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Update flags after Rn AND shifter_operand
 	
 }
 
-void teq_processing(uint8_t regflag,int flag){
+void teq(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Update flags after Rn EOR shifter_operand
 	
 }
 
-void cmp_processing(uint8_t regflag,int flag){
+void cmp(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Update flags after Rn - shifter_operand
 	
 }
 
-void cmn_processing(uint8_t regflag,int flag){
+void cmn(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Update flags after Rn + shifter_operand
 	
 }
 
-void orr_processing(uint8_t regflag,int flag){
+void orr(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Logical (inclusive) OR Rd := Rn OR shifter_operand
+	uint32_t result;
+
+	result= arm_read_usr_register(p,rn) | (immed << rotate);
+	        arm_write_usr_register(p,rd, result);
+	
 }
 
-void mov_processing(uint8_t reg1,uint8_t reg2){
+void mov(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 	
 	//Rd := shifter_operand (no first operand)
 	
+	        arm_write_usr_register(p,rd, (immed << rotate));
+	
 }
 
-void bic_processing(){
+void bic(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Bit Clear Rd := Rn AND NOT(shifter_operand)
+	uint32_t result;
+
+	result= arm_read_usr_register(p,rn) & (~(immed << rotate));
+	        arm_write_usr_register(p,rd, result);
 	
 }
 
-void mvn_processing(){
+void mvn(arm_core p,uint8_t rd,uint8_t rn,uint8_t rotate,uint8_t immed,int s){
 
 	//Move Not Rd := NOT shifter_operand (no first operand)
+
+	arm_write_usr_register(p,rd, (~(immed << rotate));
 	
+}
+
+int maj_ZNCV(uint32_t value){
+
+	if(get_N)
 }
 
 
