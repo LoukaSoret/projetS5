@@ -31,7 +31,8 @@ int arm_load_store(arm_core p, uint32_t ins) {
 }
 
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
-	uint32_t *adr = NULL; 
+	uint32_t *adr = NULL;
+	int nbreg = 0;
     if(get_bit(ins,20)){ //Cas du load
     	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),adr);
     	if(get_bit(ins,23)){ // U == 1 , on remonte les adresses
@@ -42,8 +43,12 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    		if(get_bit(ins,i)){
 	    			arm_write_register(p,i,*adr);
 	    			adr--;
+	    			nbreg++;
 	    		}
 	    	}
+	    	if(get_bit(ins,21)){ // W == 1, on incremente Rn
+    			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))-(4*nbreg));
+    		}
     	}else{
     		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
     			adr++;
@@ -52,8 +57,12 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    		if(get_bit(ins,i)){
 	    			arm_write_register(p,i,*adr);
 	    			adr++;
+	    			nbreg++;
 	    		}
 	    	}
+	    	if(get_bit(ins,21)){ // W == 1, on incremente Rn
+    			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))+(4*nbreg));
+    		}
     	}
     }else{ // Cas du store
     	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),adr);
@@ -65,8 +74,12 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    		if(get_bit(ins,i)){
 	    			*adr = arm_read_register(p,i);
 	    			adr--;
+	    			nbreg++;
 	    		}
 	    	}
+	    	if(get_bit(ins,21)){ // W == 1, on incremente Rn
+    			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))-(4*nbreg));
+    		}
     	}else{
     		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
     			adr++;
@@ -75,10 +88,15 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    		if(get_bit(ins,i)){
 	    			*adr = arm_read_register(p,i);
 	    			adr++;
+	    			nbreg++;
 	    		}
 	    	}
+	    	if(get_bit(ins,21)){ // W == 1, on incremente Rn
+    			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))+(4*nbreg));
+    		}
     	}
     }
+
     return 0;
 }
 
