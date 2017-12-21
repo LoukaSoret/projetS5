@@ -39,15 +39,21 @@ static int arm_execute_instruction(arm_core p) {
     	switch(get_bits(instruction, 27, 25))
     	{
     		case 0b000:
-    			switch(get_bits(instruction,24,23)){
-    				case 0b10:
+    			switch((get_bits(instruction,24,23)<<3) | (get_bit(instruction,7))<<2 | (get_bit(instruction,4))<<1 | (get_bit(instruction,20)) ){
+    				case 0b10010:
+                    case 0b10000:
+                    case 0b10100:
     					arm_miscellaneous(p, instruction);
     					break;
     				default:
     					if (get_bit(instruction,4) && get_bit(instruction,7)){
-    						/* Multiplies: See Figure A3-3
-							   Extra load/stores: See Figure A3-5 */
-    						arm_load_store(p, instruction);
+    						if(get_bits(instruction,6,5)){
+                                /* Extra load/stores for signed bytes, halfwords and doublewords */
+                                arm_load_store(p, instruction);
+                            }
+                            else{
+                                /* Multiplies */
+                            }
     					}
     					else{
     						/* Data processing register/immediate shift */
