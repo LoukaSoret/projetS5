@@ -192,7 +192,7 @@ void mov_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
 
 	     if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
 	{
-         maj_ZNCV(p,result);
+         maj_ZNCV(p,arm_read_usr_register(p,rd));
 
 	} 
 	
@@ -275,6 +275,8 @@ void maj_ZNCV(arm_core p,uint32_t value){
 	{
 		set_bit(val,31);
 	} 
+	  else
+	  	clr_bit(val,31);
 
     //indicateur Z
 	if(value == 0){
@@ -282,18 +284,22 @@ void maj_ZNCV(arm_core p,uint32_t value){
 		set_bit(val,30);
 
 	} 
+	  else
+	  	clr_bit(val,30);
 
-	//indicateur C
-	if(get_bit(value,29)){
+	//indicateur C et V
+	//voir s'il ya une retenue
+	if(get_bit(value,32) == 1){
 
-       /* a completer*/
+       set_bit(val,29);
+       set_bit(val,28);
 	} 
+	 else{
+         
+         clr_bit(val,29);
+	     clr_bit(val,28);
+	 }
 
-	//indicateur V
-	if(get_bit(value,28)){
-
-        /* a completer */
-	} 
-
+	
    arm_write_cpsr(p, val);
 }
