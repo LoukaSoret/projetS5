@@ -146,7 +146,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 						arm_read_half(p, Vn, &VdHalf);
 						arm_write_register(p, Rd, VdHalf);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_read_word(p, Vn, &Vd);
 						arm_write_register(p, Rd, Vd);
 						Vn += 4;
@@ -172,7 +172,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -196,7 +196,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -224,7 +224,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 						arm_read_half(p, Vn, &VdHalf);
 						arm_write_register(p, Rd, VdHalf);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_read_word(p, Vn, &Vd);
 						arm_write_register(p, Rd, Vd);
 						Vn += 4;
@@ -250,7 +250,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -274,7 +274,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -306,7 +306,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 						arm_read_half(p, Vn, &VdHalf);
 						arm_write_register(p, Rd, VdHalf);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_read_word(p, Vn, &Vd);
 						arm_write_register(p, Rd, Vd);
 						Vn += 4;
@@ -333,7 +333,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -358,7 +358,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -387,7 +387,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 						arm_read_half(p, Vn, &VdHalf);
 						arm_write_register(p, Rd, VdHalf);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_read_word(p, Vn, &Vd);
 						arm_write_register(p, Rd, Vd);
 						Vn += 4;
@@ -414,7 +414,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -439,7 +439,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -474,7 +474,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 						arm_read_half(p, Vn, &VdHalf);
 						arm_write_register(p, Rd, VdHalf);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_read_word(p, Vn, &Vd);
 						arm_write_register(p, Rd, Vd);
 						Vn += 4;
@@ -501,7 +501,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -526,7 +526,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -555,7 +555,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 						arm_read_half(p, Vn, &VdHalf);
 						arm_write_register(p, Rd, VdHalf);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_read_word(p, Vn, &Vd);
 						arm_write_register(p, Rd, Vd);
 						Vn += 4;
@@ -582,7 +582,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -607,7 +607,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_register(p, Rd, Vd);
 							Vn += 4;
@@ -639,7 +639,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 						arm_read_half(p, Vn, &VdHalf);
 						arm_write_usr_register(p, Rd, VdHalf);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_read_word(p, Vn, &Vd);
 						arm_write_usr_register(p, Rd, Vd);
 						Vn += 4;
@@ -666,7 +666,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_usr_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_usr_register(p, Rd, Vd);
 							Vn += 4;
@@ -691,7 +691,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_usr_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_usr_register(p, Rd, Vd);
 							Vn += 4;
@@ -720,7 +720,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 						arm_read_half(p, Vn, &VdHalf);
 						arm_write_usr_register(p, Rd, VdHalf);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_read_word(p, Vn, &Vd);
 						arm_write_usr_register(p, Rd, Vd);
 						Vn += 4;
@@ -747,7 +747,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_usr_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_usr_register(p, Rd, Vd);
 							Vn += 4;
@@ -772,7 +772,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 							arm_read_half(p, Vn, &VdHalf);
 							arm_write_usr_register(p, Rd, VdHalf);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_read_word(p, Vn, &Vd);
 							arm_write_usr_register(p, Rd, Vd);
 							Vn += 4;
@@ -812,7 +812,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 					if(H){
 						arm_write_half(p, Vn, Vd);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_write_word(p, Vn, Vd);
 						Vn += 4;
 						Vd = arm_read_register(p, Rd+1);
@@ -835,7 +835,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -856,7 +856,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -881,7 +881,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 					if(H){
 						arm_write_half(p, Vn, Vd);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_write_word(p, Vn, Vd);
 						Vn += 4;
 						Vd = arm_read_register(p, Rd+1);
@@ -904,7 +904,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -925,7 +925,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -954,7 +954,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 					if(H){
 						arm_write_half(p, Vn, Vd);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_write_word(p, Vn, Vd);
 						Vn += 4;
 						Vd = arm_read_register(p, Rd+1);
@@ -978,7 +978,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1000,7 +1000,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1026,7 +1026,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 					if(H){
 						arm_write_half(p, Vn, Vd);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_write_word(p, Vn, Vd);
 						Vn += 4;
 						Vd = arm_read_register(p, Rd+1);
@@ -1050,7 +1050,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1072,7 +1072,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1104,7 +1104,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 					if(H){
 						arm_write_half(p, Vn, Vd);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_write_word(p, Vn, Vd);
 						Vn += 4;
 						Vd = arm_read_register(p, Rd+1);
@@ -1128,7 +1128,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1150,7 +1150,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1176,7 +1176,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 					if(H){
 						arm_write_half(p, Vn, Vd);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_write_word(p, Vn, Vd);
 						Vn += 4;
 						Vd = arm_read_register(p, Rd+1);
@@ -1200,7 +1200,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1222,7 +1222,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1251,7 +1251,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 					if(H){
 						arm_write_half(p, Vn, Vd);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_write_word(p, Vn, Vd);
 						Vn += 4;
 						Vd = arm_read_register(p, Rd+1);
@@ -1275,7 +1275,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1297,7 +1297,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1323,7 +1323,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 					if(H){
 						arm_write_half(p, Vn, Vd);
 					}
-					else if(D && Rd+1<=17){
+					else if(D && Rd<14){
 						arm_write_word(p, Vn, Vd);
 						Vn += 4;
 						Vd = arm_read_register(p, Rd+1);
@@ -1347,7 +1347,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
@@ -1369,7 +1369,7 @@ int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uin
 						if(H){
 							arm_write_half(p, Vn, Vd);
 						}
-						else if(D && Rd+1<=17){
+						else if(D && Rd<14){
 							arm_write_word(p, Vn, Vd);
 							Vn += 4;
 							Vd = arm_read_register(p, Rd+1);
