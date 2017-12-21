@@ -32,11 +32,15 @@ int arm_load_store(arm_core p, uint32_t ins) {
 
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	uint32_t *adr = NULL;
+	int L = get_bit(ins,20);
+	int U = get_bit(ins,23);
+	int P = get_bit(ins,24);
+	int W = get_bit(ins,21);
 	int nbreg = 0;
-    if(get_bit(ins,20)){ //Cas du load
+    if(L){ //Cas du load
     	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),adr);
-    	if(get_bit(ins,23)){ // U == 1 , on remonte les adresses
-    		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
+    	if(U){ // U == 1 , on remonte les adresses
+    		if(P){ // P == 1, la premiere valeur est en dehors de la range
     			adr--;
     		}
 	    	for(uint8_t i=15;i>=0;i--){
@@ -46,11 +50,11 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    			nbreg++;
 	    		}
 	    	}
-	    	if(get_bit(ins,21)){ // W == 1, on incremente Rn
+	    	if(W){ // W == 1, on incremente Rn
     			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))-(4*nbreg));
     		}
     	}else{
-    		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
+    		if(P){ // P == 1, la premiere valeur est en dehors de la range
     			adr++;
     		}
 	    	for(uint8_t i=15;i>=0;i--){
@@ -60,14 +64,14 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    			nbreg++;
 	    		}
 	    	}
-	    	if(get_bit(ins,21)){ // W == 1, on incremente Rn
+	    	if(W){ // W == 1, on incremente Rn
     			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))+(4*nbreg));
     		}
     	}
     }else{ // Cas du store
     	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),adr);
-    	if(get_bit(ins,23)){ // U == 1 , on remonte les adresses
-    		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
+    	if(U){ // U == 1 , on remonte les adresses
+    		if(P){ // P == 1, la premiere valeur est en dehors de la range
     			adr--;
     		}
 	    	for(uint8_t i=15;i>=0;i--){
@@ -77,11 +81,11 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    			nbreg++;
 	    		}
 	    	}
-	    	if(get_bit(ins,21)){ // W == 1, on incremente Rn
+	    	if(W){ // W == 1, on incremente Rn
     			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))-(4*nbreg));
     		}
     	}else{
-    		if(get_bit(ins,24)){ // P == 1, la premiere valeur est en dehors de la range
+    		if(P){ // P == 1, la premiere valeur est en dehors de la range
     			adr++;
     		}
 	    	for(uint8_t i=15;i>=0;i--){
@@ -91,7 +95,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    			nbreg++;
 	    		}
 	    	}
-	    	if(get_bit(ins,21)){ // W == 1, on incremente Rn
+	    	if(W){ // W == 1, on incremente Rn
     			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))+(4*nbreg));
     		}
     	}
