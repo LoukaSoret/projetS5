@@ -18,7 +18,7 @@ int shift(arm_core p, uint16_t ins){
 	int32_t value_reg = arm_read_register(p,reg);
 	int value = 0;
 	switch(shift){
-		case LSL:
+		case LSL: // Shift left immediat
 			if(shift_imm > 0){
 				value = value_reg<<shift_imm;
 			}else{
@@ -27,7 +27,7 @@ int shift(arm_core p, uint16_t ins){
 			return value;
 		break;
 
-		case LSLr:
+		case LSLr: // Shift left avec registre
 			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
 			if(regs < 32){
 				value = value_reg<<regs;
@@ -39,7 +39,7 @@ int shift(arm_core p, uint16_t ins){
 			return value;
 		break;
 
-		case LSR:
+		case LSR: //Shit right immediat
 			if(shift_imm > 0){
 				value = value_reg>>shift_imm;
 			}else{
@@ -48,7 +48,7 @@ int shift(arm_core p, uint16_t ins){
 			return value;
 		break;
 
-		case LSRr:
+		case LSRr: // Shift right avec registre
 			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
 			if(regs < 32){
 				value = value_reg>>regs;
@@ -60,20 +60,20 @@ int shift(arm_core p, uint16_t ins){
 			return value;
 		break;
 
-		case ASR:
+		case ASR: // Shift arithmétique immediat
 			return asr(value_reg,shift_imm);
 		break;
 
-		case ASRr:
+		case ASRr: // Shift arithmétique avec registre
 			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
 			return ror(value_reg,regs);
 		break;
 
-		case ROR:
+		case ROR: // Rotation immediat
 			return ror(value_reg,shift_imm);
 		break;
 
-		case RORr:
+		case RORr: // rotation avec registre
 			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
 			return ror(value_reg,regs);
 		break;
