@@ -39,9 +39,7 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
 
 
 
-
-
-void and_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void and_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
    
    //Rd := Rn AND shifter_operand
 	uint32_t result;
@@ -49,29 +47,17 @@ void and_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
 	result= arm_read_usr_register(p,rn) & val_sh;
            arm_write_usr_register(p,rd, result);
 
-	if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-       tst_processing(p,rd);
-
-	} 
-
 }
 
-void sub_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void sub_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
     
     //Rd := Rn - shifter_operand
     uint32_t result;
     result= arm_read_usr_register(p,rn) - val_sh;
            arm_write_usr_register(p,rd, result);
-
-        if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-        cmp_processing(arm_core p,uint8_t rd);
-
-	} 
 }
 
-void add_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void add_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 	
 	//Rd := Rn + shifter_operand
 	uint32_t result;
@@ -79,14 +65,9 @@ void add_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
     result= arm_read_usr_register(p,rn) + val_sh;
            arm_write_usr_register(p,rd, result);
 
-            if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         cmn_processing(p,rd);
-
-	} 
 }
 
-void eor_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void eor_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 	
 	//Rd := Rn EOR shifter_operand
 
@@ -95,16 +76,10 @@ void eor_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
    result= arm_read_usr_register(p,rn) ^ val_sh;
            arm_write_usr_register(p,rd, result);
 
-            if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         teq_processing(p,rd);
-
-	} 
-
 }
 
 
-void rsb_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void rsb_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 
 	//Rd := shifter_operand - Rn
 
@@ -113,92 +88,58 @@ void rsb_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
    result= val_sh - arm_read_usr_register(p,rn);
            arm_write_usr_register(p,rd, result);
 
-           if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         maj_ZNCV(p,result);
-
-	} 
-
 }
 
-void adc_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void adc_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 
 	//Rd := Rn + shifter_operand + Carry Flag
 	uint32_t result;
 
-	result= arm_read_usr_register(p,rn) + val_sh + read_C(p);
+	result= arm_read_usr_register(p,rn) + val_sh + get_bit(arm_read_cpsr(p),29);
             arm_write_usr_register(p,rd, result);
 
-             if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         maj_ZNCV(p,result);
-
-	} 
 }
 
-void sbc_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void sbc_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 
 	//Rd := Rn - shifter_operand - NOT(Carry Flag)
 	uint32_t result;
 		
-		result= arm_read_usr_register(p,rn) - val_sh - (~(read_C(p));
+		result= arm_read_usr_register(p,rn) - val_sh - (~(get_bit(arm_read_cpsr(p),29)));
 	            arm_write_usr_register(p,rd, result);
-	
-	 if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         maj_ZNCV(p,result);
-
-	} 
+	}
 
 	
 
 
-void rsc_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void rsc_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 
 	//Rd := shifter_operand - Rn - NOT(Carry Flag)
 	uint32_t result;
 
-	result= val_sh - arm_read_usr_register(p,rn) - (~(read_C(p));
+	result= val_sh - arm_read_usr_register(p,rn) - (~(get_bit(arm_read_cpsr(p),29)));
 	     arm_write_usr_register(p,rd, result);
-
-	     if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         maj_ZNCV(p,result);
-
-	} 
 }
 
-	void orr_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+	void orr_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 
 	//Logical (inclusive) OR Rd := Rn OR shifter_operand
 	uint32_t result;
 
 	result= arm_read_usr_register(p,rn) | val_sh;
 	        arm_write_usr_register(p,rd, result);
-
-	     if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         maj_ZNCV(p,result);
-
-	} 
 	
 }
 
-void mov_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void mov_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 	
 	//Rd := shifter_operand (no first operand)
 	
 	        arm_write_usr_register(p,rd, val_sh);
-
-	     if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         maj_ZNCV(p,arm_read_usr_register(p,rd));
-
-	} 
 	
 }
 
-void bic_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void bic_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 
 	//Bit Clear Rd := Rn AND NOT(shifter_operand)
 	uint32_t result;
@@ -206,100 +147,173 @@ void bic_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
 	result= arm_read_usr_register(p,rn) & (~val_sh);
 	        arm_write_usr_register(p,rd, result);
 
-	     if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         maj_ZNCV(p,result);
-
-	} 
 	
 }
 
-void mvn_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh,int s){
+void mvn_processing(arm_core p,uint8_t rd,uint8_t rn,int val_sh){
 
 	//Move Not Rd := NOT shifter_operand (no first operand)
 
-	arm_write_usr_register(p,rd, (~val_sh);
+	arm_write_usr_register(p,rd, (~val_sh));
 
-	     if(s==1)  // si les  indicateurs NZCV de cpsr doivent être maj
-	{
-         maj_ZNCV(p,arm_read_usr_register(p,rd));
-
-	} 
 }
 	
 
 
 
 
-void tst_processing(arm_core p,uint8_t rd){
+void tst_processing(arm_core p,uint8_t rd,uint8_t rn,uint32_t val_sh){
 
 	//Update flags after Rn AND shifter_operand
+	uint32_t resultat,operande_1;
 
-	maj_ZNCV(p,arm_read_usr_register(p,rd));
+	and_processing(p,rd,rn,val_sh);
 
+	resultat=arm_read_usr_register(p,rd);
+	operande_1=arm_read_usr_register(p,rn);
+
+	//indicateur Z
+	if(resultat == 0){
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<30)));
+	}
+	else
+		arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<30))));
+	
+	//indicateur N
+	if (get_bit(resultat,31) == 1)
+	{
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<31)));
+	}
+	else
+		arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<31))));
+    
+
+	//indicateur V
+	if(operande_1 !=0 && (resultat/operande_1) != val_sh){
+
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<28)));
+	}
+	else
+        arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));
+
+    // dans un AND C=0;
+    arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<29))));
 	
 }
 
-void teq_processing(arm_core p,uint8_t rd){
+void teq_processing(arm_core p,uint8_t rd,uint8_t rn,uint32_t val_sh){
 
 	//Update flags after Rn EOR shifter_operand
-	maj_ZNCV(p,arm_read_usr_register(p,rd));
+
+	uint32_t resultat;
+
+	eor_processing(p,rd,rn,val_sh);
+
+	resultat=arm_read_usr_register(p,rd);
+
+	//indicateur Z
+	if(resultat == 0){
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<30)));
+	}
+	else
+		arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<30))));
+	
+	//indicateur N
+	if (get_bit(resultat,31) == 1)
+	{
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<31)));
+	}
+	else
+		arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<31))));
+    
+
+	//indicateur V
+	//V=0 dans un xor
+        arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));
+
+    // Indicateur C;
+    //C=0 dans un xor
+        arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<29))));
 	
 }
 
-void cmp_processing(arm_core p,uint8_t rd){
+void cmp_processing(arm_core p,uint8_t rd,uint8_t rn,uint32_t val_sh){
 
 	//Update flags after Rn - shifter_operand
-	maj_ZNCV(p,arm_read_usr_register(p,rd));
+	
+
+	uint32_t resultat,operande_1;
+
+	sub_processing(p,rd,rn,val_sh);
+
+	resultat=arm_read_usr_register(p,rd);
+	operande_1=arm_read_usr_register(p,rn);
+
+	//indicateur Z
+	if(resultat == 0){
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<30)));
+	}
+	else
+		arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<30))));
+	
+	//indicateur N
+	if (get_bit(resultat,31) == 1)
+	{
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<31)));
+	}
+	else
+		arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<31))));
+    
+
+	//indicateur V
+	if(get_bit(operande_1,31) == get_bit(val_sh,31) && get_bit(operande_1,31) != get_bit(resultat,31)){
+
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<28)));
+	}
+	else
+        arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));
+
+    // Indicateur C;
+    /* a completer */
 	
 }
 
-void cmn_processing(arm_core p,uint8_t rd){
+void cmn_processing(arm_core p,uint8_t rd,uint8_t rn,uint32_t val_sh){
 
 	//Update flags after Rn + shifter_operand
-	maj_ZNCV(p,arm_read_usr_register(p,rd));
+
+	uint32_t resultat,operande_1;
+
+	add_processing(p,rd,rn,val_sh);
+
+	resultat=arm_read_usr_register(p,rd);
+	operande_1=arm_read_usr_register(p,rn);
+
+	//indicateur Z
+	if(resultat == 0){
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<30)));
+	}
+	else
+		arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<30))));
 	
-}
-
-
- // fonction de mise à jour des régistres
-
-void maj_ZNCV(arm_core p,uint32_t value){
-	
-	uint32_t val;
-
-	val=arm_read_cpsr(p);
-
-    //indicateur N
-	if(get_bit(value,31) == 1) // voir si le bit de poids fort est égal à 1 et dans ce cas N=1
+	//indicateur N
+	if (get_bit(resultat,31) == 1)
 	{
-		set_bit(val,31);
-	} 
-	  else
-	  	clr_bit(val,31);
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<31)));
+	}
+	else
+		arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<31))));
+    
 
-    //indicateur Z
-	if(value == 0){
+	//indicateur V
+	if(get_bit(operande_1,31) == get_bit(val_sh,31) && get_bit(operande_1,31) != get_bit(resultat,31)){
 
-		set_bit(val,30);
+		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<28)));
+	}
+	else
+        arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));
 
-	} 
-	  else
-	  	clr_bit(val,30);
-
-	//indicateur C et V
-	//voir s'il ya une retenue
-	if(get_bit(value,32) == 1){
-
-       set_bit(val,29);
-       set_bit(val,28);
-	} 
-	 else{
-         
-         clr_bit(val,29);
-	     clr_bit(val,28);
-	 }
-
+    // Indicateur C
+    /* a completer */
 	
-   arm_write_cpsr(p, val);
 }
