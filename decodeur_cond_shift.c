@@ -6,8 +6,8 @@
 #include "util.h"
 #include "debug.h"
 
-int condition(arm_core p, uint32_t ins){
-	int cond = get_bits(ins, 31, 28);
+int condition(arm_core p, uint8_t ins){
+	return UNDEFINED_INSTRUCTION;
 	
 }
 
@@ -17,6 +17,7 @@ int shift(arm_core p, uint16_t ins){
 	int8_t reg = get_bits(ins,3,0);
 	int32_t value_reg = arm_read_register(p,reg);
 	int value = 0;
+	int8_t regs;
 	switch(shift){
 		case LSL: // Shift left immediat
 			if(shift_imm > 0){
@@ -28,7 +29,7 @@ int shift(arm_core p, uint16_t ins){
 		break;
 
 		case LSLr: // Shift left avec registre
-			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
+			regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
 			if(regs < 32){
 				value = value_reg<<regs;
 			}else if(regs == 0){
@@ -49,7 +50,7 @@ int shift(arm_core p, uint16_t ins){
 		break;
 
 		case LSRr: // Shift right avec registre
-			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
+			regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
 			if(regs < 32){
 				value = value_reg>>regs;
 			}else if(regs == 0){
@@ -65,7 +66,7 @@ int shift(arm_core p, uint16_t ins){
 		break;
 
 		case ASRr: // Shift arithmétique avec registre
-			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
+			regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
 			return ror(value_reg,regs);
 		break;
 
@@ -74,8 +75,12 @@ int shift(arm_core p, uint16_t ins){
 		break;
 
 		case RORr: // rotation avec registre
-			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
+			regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
 			return ror(value_reg,regs);
+		break;
+
+		default:
+			return 0;
 		break;
 	}
 }

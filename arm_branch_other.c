@@ -22,13 +22,28 @@ Contact: Guillaume.Huard@imag.fr
 */
 #include "arm_branch_other.h"
 #include "arm_constants.h"
+#include "decodeur_cond_shift.h"
 #include "util.h"
 #include <debug.h>
 #include <stdlib.h>
 
 
 int arm_branch(arm_core p, uint32_t ins) {
-    return UNDEFINED_INSTRUCTION;
+    if(condition(p,get_bits(ins,31,28))){
+        int32_t adr = get_bits(ins,23,0);
+        if(get_bit(adr,23)){
+            adr = adr | 0xFF0000000;
+        }
+        adr = adr<<2;
+        int L = get_bit(ins,24); 
+        if(L){ // Si L est == 1 alors on sauvegarde la valuer de PC dans R14
+            arm_write_register(p,14,arm_read_register(p,15));
+            arm_write_register(p,15,arm_read_register(p,15)+adr);
+        }else{
+            arm_write_register(p,15,arm_read_register(p,15)+adr);
+        }
+    }
+    return 0;
 }
 
 int arm_coprocessor_others_swi(arm_core p, uint32_t ins) {
