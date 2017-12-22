@@ -50,13 +50,9 @@ Contact: Guillaume.Huard@imag.fr
 
 /* shift operations */
 #define LSL 0
-#define LSLr 1
-#define LSR 2
-#define LSRr 3
-#define ASR 4
-#define ASRr 5
-#define ROR 6
-#define RORr 7
+#define LSR 1
+#define ASR 2
+#define ROR 3
 
 /* Bit mask constants for msr */
 /* We simulate architecture v5T */
