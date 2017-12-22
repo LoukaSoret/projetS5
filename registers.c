@@ -70,7 +70,7 @@ uint32_t read_register(registers r, uint8_t reg) {
 		return r->reg_no[reg];
 	}
 	else{
-		return -1 
+		return -1 ;
 	}
 }
 
