@@ -27,6 +27,14 @@ Contact: Guillaume.Huard@imag.fr
 #include "debug.h"
 #include "decodeur_cond_shift.h"
 
+/*
+Auteur : Louka
+Date : 22/12/17
+Specification:
+Entrees: coeur p , instruction ins sur 32bits
+Sorties: 
+
+*/
 int arm_load_store(arm_core p, uint32_t ins) {
 	uint8_t Rn,Rd,shift_amount,shift,Rm,P,U,I,B,W,L,condition,codeOp;;
     uint16_t immediate;
