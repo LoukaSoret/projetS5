@@ -66,7 +66,12 @@ int in_a_privileged_mode(registers r) {
 }
 
 uint32_t read_register(registers r, uint8_t reg) {
-	return r->reg_no[reg];
+	if(reg < 16 && reg >=0){
+		return r->reg_no[reg];
+	}
+	else{
+		return -1 
+	}
 }
 
 uint32_t read_usr_register(registers r, uint8_t reg) {
@@ -87,7 +92,7 @@ uint32_t read_spsr(registers r) {
 }
 
 void write_register(registers r, uint8_t reg, uint32_t value) {
-	if(reg <= 17 && reg >=0){
+	if(reg < 16 && reg >=0){
 		r->reg_no[reg] = value;
 	}
 }
