@@ -69,6 +69,9 @@ uint32_t read_register(registers r, uint8_t reg) {
 	if(reg>=0 && reg<16){
 		return r->reg_no[reg];
 	}
+	else{
+		return -1;
+	}
 }
 
 uint32_t read_usr_register(registers r, uint8_t reg) {

@@ -62,10 +62,10 @@ int arm_load_store(arm_core p, uint32_t ins) {
     	/* Load and store for bytes and words */
     	if(codeOp){
     		if(L){
-    			return arm_load_byte_word(p,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift,Rm);
+    			return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift,Rm);
     		}
     		else{
-    			return arm_store_byte_word(p,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift,Rm);
+    			return arm_store_byte_word(p,ins,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift,Rm);
     		}
     	}
     	/* Load and store for half-words and double-words */
@@ -110,24 +110,24 @@ int arm_load_store_half_double(arm_core p,uint32_t ins)
     {
     	/* L=0, S=0, H=1 Store halfword. */
     	case 0b001 :
-    		return arm_load_byte_word(p,Rn,Rd,I,P,U,0,W,1,0,immediate,shift_amount,shift,Rm);
+    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,0,W,1,0,immediate,shift_amount,shift,Rm);
     		break;
     	/* L=0, S=1, H=0 Load doubleword. */
     	case 0b010 :
-    		return arm_load_byte_word(p,Rn,Rd,I,P,U,1,W,0,1,immediate,shift_amount,shift,Rm);
+    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,1,W,0,1,immediate,shift_amount,shift,Rm);
     		break;
     	/* L=0, S=1, H=1 Store doubleword. */
     	case 0b011 :
-    		return arm_load_byte_word(p,Rn,Rd,I,P,U,0,W,0,1,immediate,shift_amount,shift,Rm);
+    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,0,W,0,1,immediate,shift_amount,shift,Rm);
     		break;
     	/* L=1, S=0, H=1 Load unsigned halfword. */
     	case 0b111 :
     	case 0b101 :
-    		return arm_load_byte_word(p,Rn,Rd,I,P,U,1,W,1,0,immediate,shift_amount,shift,Rm);
+    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,1,W,1,0,immediate,shift_amount,shift,Rm);
     		break;
     	/* L=1, S=1, H=0 Load signed byte. */
     	case 0b110 :
-    		return arm_load_byte_word(p,Rn,Rd,I,P,U,1,W,0,0,immediate,shift_amount,shift,Rm);
+    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,1,W,0,0,immediate,shift_amount,shift,Rm);
     		break;
     	default :
     		return -1;
@@ -135,7 +135,7 @@ int arm_load_store_half_double(arm_core p,uint32_t ins)
     }
 }
 
-int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift,uint8_t Rm)
+int arm_load_byte_word(arm_core p,uint32_t ins,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift,uint8_t Rm)
 {
 	uint8_t VdByte;
 	uint16_t VdHalf;
@@ -804,7 +804,7 @@ int arm_load_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint
 	return -1;
 }
 
-int arm_store_byte_word(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift,uint8_t Rm) {
+int arm_store_byte_word(arm_core p,uint32_t ins,uint32_t insuint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift,uint8_t Rm) {
 	uint32_t Vn,Vd;
     
 	/* pre-indexed addressing */
