@@ -20,12 +20,13 @@ Contact: Guillaume.Huard@imag.fr
 	 700 avenue centrale, domaine universitaire
 	 38401 Saint Martin d'Hères
 */
-#include "arm_load_store.h"
-#include "arm_exception.h"
-#include "arm_constants.h"
-#include "decodeur_cond_shift.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "memory.h"
 #include "util.h"
-#include "debug.h"
+#include "arm_load_store.h"
+#include "arm_core.h"
 #include "decodeur_cond_shift.h"
 
 /*
@@ -37,7 +38,7 @@ Sorties:
 
 */
 int arm_load_store(arm_core p, uint32_t ins) {
-	uint8_t Rn,Rd,shift_amount,shift,Rm,P,U,I,B,W,L,condition,codeOp;;
+	uint8_t Rn,Rd,shift_amount,shift_codeOp,Rm,P,U,I,B,W,L,codeOp;;
     uint16_t immediate;
 
     Rn = get_bits(ins,19,16); // Address
@@ -52,21 +53,21 @@ int arm_load_store(arm_core p, uint32_t ins) {
     L = get_bit(ins,20); // Load (1) or Store (0)
     immediate = get_bits(ins,11,0); //immediate offset
     shift_amount = get_bits(ins,11,7); // shift amount for register offset
-	shift = get_bits(ins,6,5); // shift op code for register offset
+	shift_codeOp = get_bits(ins,6,5); // shift op code for register offset
 	Rm = get_bits(ins,3,0); // offset register
 
-    condition = get_bits(ins,31,28);
+    //condition = get_bits(ins,31,28);
     codeOp = get_bits(ins,27,26);
 
     /* Condition Test */
-    if(condition(p,ins)){
+    if(1 /*condition(p,ins)*/){
     	/* Load and store for bytes and words */
     	if(codeOp){
     		if(L){
-    			return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift,Rm);
+    			return arm_load(p,ins,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift_codeOp,Rm);
     		}
     		else{
-    			return arm_store_byte_word(p,ins,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift,Rm);
+    			return arm_store(p,ins,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift_codeOp,Rm);
     		}
     	}
     	/* Load and store for half-words and double-words */
@@ -156,12 +157,20 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 
 int arm_coprocessor_load_store(arm_core p, uint32_t ins) {
     /* Not implemented */
-    return UNDEFINED_INSTRUCTION;
+    return -1;
+}
+
+int offsetHandling(int address,int offset,uint8_t U){
+	if(U){
+		return address + offset;
+	} else {
+		return address - offset;
+	}
 }
 
 int arm_load_store_half_double(arm_core p,uint32_t ins)
 {
-	uint8_t Rn,Rd,shift_amount,shift,Rm,P,U,I,W,L,S,H,tst;
+	uint8_t Rn,Rd,shift_amount,shift_codeOp,Rm,P,U,I,W,L,S,H,tst;
     uint16_t immediate;
     Rn = get_bits(ins,19,16); // Address
     Rd = get_bits(ins,15,12); // content to be loaded or stored
@@ -177,31 +186,31 @@ int arm_load_store_half_double(arm_core p,uint32_t ins)
 
     immediate = ((uint16_t)(get_bits(ins,11,8))<<4) | get_bits(ins,3,0)  ; //immediate offset
     shift_amount = 0; // shift amount for register offset
-	shift = 0; // shift op code for register offset
+	shift_codeOp = 0; // shift op code for register offset
 	Rm = get_bits(ins,3,0); // offset register
 
     switch(tst) // LSH
     {
     	/* L=0, S=0, H=1 Store halfword. */
     	case 0b001 :
-    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,0,W,1,0,immediate,shift_amount,shift,Rm);
+    		return arm_load(p,ins,Rn,Rd,I,P,U,0,W,1,0,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	/* L=0, S=1, H=0 Load doubleword. */
     	case 0b010 :
-    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,1,W,0,1,immediate,shift_amount,shift,Rm);
+    		return arm_load(p,ins,Rn,Rd,I,P,U,1,W,0,1,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	/* L=0, S=1, H=1 Store doubleword. */
     	case 0b011 :
-    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,0,W,0,1,immediate,shift_amount,shift,Rm);
+    		return arm_load(p,ins,Rn,Rd,I,P,U,0,W,0,1,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	/* L=1, S=0, H=1 Load unsigned halfword. */
     	case 0b111 :
     	case 0b101 :
-    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,1,W,1,0,immediate,shift_amount,shift,Rm);
+    		return arm_load(p,ins,Rn,Rd,I,P,U,1,W,1,0,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	/* L=1, S=1, H=0 Load signed byte. */
     	case 0b110 :
-    		return arm_load_byte_word(p,ins,Rn,Rd,I,P,U,1,W,0,0,immediate,shift_amount,shift,Rm);
+    		return arm_load(p,ins,Rn,Rd,I,P,U,1,W,0,0,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	default :
     		return -1;
@@ -209,1265 +218,153 @@ int arm_load_store_half_double(arm_core p,uint32_t ins)
     }
 }
 
-int arm_load_byte_word(arm_core p,uint32_t ins,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift,uint8_t Rm)
+int arm_load(arm_core p,uint32_t ins,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift_codeOp,uint8_t Rm)
 {
+	int error=0;
 	uint8_t VdByte;
 	uint16_t VdHalf;
     uint32_t Vn,Vd;
 
-	/* pre-indexed addressing */
-	if(P){
-		/* the base register is not updated */
-		if(W){
-			/* -offset */
-			if(!U){
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn) - immediate;
-					if(H){
-						arm_read_half(p, Vn, &VdHalf);
-						arm_write_register(p, Rd, VdHalf);
-					}
-					else if(D && Rd<14){
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-						Vn += 4;
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd+1, Vd);
-					}
-					else if(B){
-						arm_read_byte(p, Vn, &VdByte);
-						arm_write_register(p, Rd, VdByte);
-					}
-					else{
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn) - arm_read_register(p, Rm);
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn) - shift(p,ins);
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-			/* +offset */
-			else{
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn) + immediate;
-					if(H){
-						arm_read_half(p, Vn, &VdHalf);
-						arm_write_register(p, Rd, VdHalf);
-					}
-					else if(D && Rd<14){
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-						Vn += 4;
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd+1, Vd);
-					}
-					else if(B){
-					arm_read_byte(p, Vn, &VdByte);
-					arm_write_register(p, Rd, VdByte);
-					}
-					else{
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn) + arm_read_register(p, Rm);
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn) + shift(p,ins);
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-		}
-		/* the base register is updated */
+    if(!I){
+		if(!P){
+			Vn = arm_read_register(p, Rn);
+			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,immediate,U)); }
+			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,immediate,U)); }
+		}	
 		else{
-			/* -offset */
-			if(!U){
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn) - immediate;
-					arm_write_register(p,Rn,Vn);
-					if(H){
-						arm_read_half(p, Vn, &VdHalf);
-						arm_write_register(p, Rd, VdHalf);
-					}
-					else if(D && Rd<14){
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-						Vn += 4;
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd+1, Vd);
-					}
-					else if(B){
-					arm_read_byte(p, Vn, &VdByte);
-					arm_write_register(p, Rd, VdByte);
-					}
-					else{
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn) - arm_read_register(p, Rm);
-						arm_write_register(p,Rn,Vn);
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn) - shift(p,ins);
-						arm_write_register(p,Rn,Vn);
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-			/* +offset */
-			else{
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn) + immediate;
-					arm_write_register(p,Rn,Vn);
-					if(H){
-						arm_read_half(p, Vn, &VdHalf);
-						arm_write_register(p, Rd, VdHalf);
-					}
-					else if(D && Rd<14){
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-						Vn += 4;
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd+1, Vd);
-					}
-					else if(B){
-						arm_read_byte(p, Vn, &VdByte);
-						arm_write_register(p, Rd, VdByte);
-					}
-					else{
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn) + arm_read_register(p, Rm);
-						arm_write_register(p,Rn,Vn);
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn) + shift(p,ins);
-						arm_write_register(p,Rn,Vn);
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-					}
-				}
-			}
+			Vn = offsetHandling(arm_read_register(p,Rn),immediate,U);				
+			if(!W){ arm_write_register(p,Rn,Vn); }
+		}
+    }
+    else{
+		if(!P){
+			Vn = arm_read_register(p, Rn);
+			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,ins),U)); }
+			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,ins),U)); }
+		}	
+		else{
+			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,ins),U);				
+			if(!W){ arm_write_register(p,Rn,Vn); }
 		}
 	}
-	/* post-indexed addressing */
+	if(H){
+		if(Vn%2==0){
+			error |= arm_read_half(p, Vn, &VdHalf);
+			if(!P && !W){
+				arm_write_usr_register(p, Rd, VdHalf);
+			} else{
+				arm_write_register(p, Rd, VdHalf);
+			}
+		} else {
+			error |= -1;
+		}
+	}
+	else if(D && Rd<14){
+		if(Vn%4==0){
+			if(!P && !W){ 
+				error |= arm_read_word(p, Vn, &Vd);
+				arm_write_usr_register(p, Rd, Vd);
+				Vn += 4;
+				error |= arm_read_word(p, Vn, &Vd);
+				arm_write_usr_register(p, Rd+1, Vd);
+			} else {
+				error |= arm_read_word(p, Vn, &Vd);
+				arm_write_register(p, Rd, Vd);
+				Vn += 4;
+				error |= arm_read_word(p, Vn, &Vd);
+				arm_write_register(p, Rd+1, Vd);			
+			}
+		} else {
+			error |= -1;
+		}
+	}
+	else if(B){
+		error |= arm_read_byte(p, Vn, &VdByte);
+		if(!P && !W){
+			arm_write_usr_register(p, Rd, VdByte);;
+		} else{
+			arm_write_register(p, Rd, VdByte);
+		}
+	}
 	else{
-		/* normal memory access */
-		if(W){
-			/* -offset */
-			if(!U){
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn);
-					arm_write_register(p,Rn,Vn - immediate);
-					if(H){
-						arm_read_half(p, Vn, &VdHalf);
-						arm_write_register(p, Rd, VdHalf);
-					}
-					else if(D && Rd<14){
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-						Vn += 4;
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd+1, Vd);
-					}
-					else if(B){
-					arm_read_byte(p, Vn, &VdByte);
-					arm_write_register(p, Rd, VdByte);
-					}
-					else{
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn);
-			    		arm_write_register(p,Rn,Vn - arm_read_register(p, Rm));
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn);
-			    		arm_write_register(p,Rn,Vn - shift(p,ins));
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-					}
-				}
+		if(Vn%4==0){
+			error |= arm_read_word(p, Vn, &Vd);
+			if(!P && !W){
+				arm_write_usr_register(p, Rd, Vd);
+			} else{
+				arm_write_register(p, Rd, Vd);
 			}
-			/* +offset */
-			else{
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn);
-					arm_write_register(p,Rn,Vn + immediate);
-					if(H){
-						arm_read_half(p, Vn, &VdHalf);
-						arm_write_register(p, Rd, VdHalf);
-					}
-					else if(D && Rd<14){
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-						Vn += 4;
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd+1, Vd);
-					}
-					else if(B){
-					arm_read_byte(p, Vn, &VdByte);
-					arm_write_register(p, Rd, VdByte);
-					}
-					else{
-						arm_read_word(p, Vn, &Vd);
-						arm_write_register(p, Rd, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn);
-			    		arm_write_register(p,Rn,Vn + arm_read_register(p, Rm));
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn);
-			    		arm_write_register(p,Rn,Vn + shift(p,ins));
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_register(p, Rd, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-		}
-		/* User mode memory access */
-		else{
-			/* -offset */
-			if(!U){
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_usr_register(p, Rn);
-					arm_write_usr_register(p,Rn,Vn - immediate);
-					if(H){
-						arm_read_half(p, Vn, &VdHalf);
-						arm_write_usr_register(p, Rd, VdHalf);
-					}
-					else if(D && Rd<14){
-						arm_read_word(p, Vn, &Vd);
-						arm_write_usr_register(p, Rd, Vd);
-						Vn += 4;
-						arm_read_word(p, Vn, &Vd);
-						arm_write_usr_register(p, Rd+1, Vd);
-					}
-					else if(B){
-					arm_read_byte(p, Vn, &VdByte);
-					arm_write_usr_register(p, Rd, VdByte);
-					}
-					else{
-						arm_read_word(p, Vn, &Vd);
-						arm_write_usr_register(p, Rd, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_usr_register(p, Rn);
-						arm_write_usr_register(p,Rn,Vn - arm_read_register(p, Rm));
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_usr_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_usr_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_usr_register(p, Rn);
-						arm_write_usr_register(p,Rn,Vn - shift(p,ins));
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_usr_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_usr_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-			/* +offset */
-			else{
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_usr_register(p, Rn);
-					arm_write_usr_register(p,Rn,Vn + immediate);
-					if(H){
-						arm_read_half(p, Vn, &VdHalf);
-						arm_write_usr_register(p, Rd, VdHalf);
-					}
-					else if(D && Rd<14){
-						arm_read_word(p, Vn, &Vd);
-						arm_write_usr_register(p, Rd, Vd);
-						Vn += 4;
-						arm_read_word(p, Vn, &Vd);
-						arm_write_usr_register(p, Rd+1, Vd);
-					}
-					else if(B){
-					arm_read_byte(p, Vn, &VdByte);
-					arm_write_usr_register(p, Rd, VdByte);
-					}
-					else{
-						arm_read_word(p, Vn, &Vd);
-						arm_write_usr_register(p, Rd, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_usr_register(p, Rn);
-						arm_write_usr_register(p,Rn,Vn + arm_read_register(p, Rm));
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_usr_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_usr_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_usr_register(p, Rn);
-						arm_write_usr_register(p,Rn,Vn + shift(p,ins));
-						if(H){
-							arm_read_half(p, Vn, &VdHalf);
-							arm_write_usr_register(p, Rd, VdHalf);
-						}
-						else if(D && Rd<14){
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd, Vd);
-							Vn += 4;
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd+1, Vd);
-						}
-						else if(B){
-							arm_read_byte(p, Vn, &VdByte);
-							arm_write_usr_register(p, Rd, VdByte);
-						}
-						else{
-							arm_read_word(p, Vn, &Vd);
-							arm_write_usr_register(p, Rd, Vd);
-						}
-						return 0;
-					}
-				}
-			}
+		} else {
+			error |= -1;
 		}
 	}
-	return -1;
+	return error;
 }
 
-int arm_store_byte_word(arm_core p,uint32_t ins,uint32_t insuint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift,uint8_t Rm) {
+int arm_store(arm_core p,uint32_t ins,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift_codeOp,uint8_t Rm) {
+	int error=0;
 	uint32_t Vn,Vd;
     
-	/* pre-indexed addressing */
-	if(P){
-		/* the base register is not updated */
-		if(W){
-			/* -offset */
-			if(!U){
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn) - immediate;
-					Vd = arm_read_register(p, Rd);
-					if(H){
-						arm_write_half(p, Vn, Vd);
-					}
-					else if(D && Rd<14){
-						arm_write_word(p, Vn, Vd);
-						Vn += 4;
-						Vd = arm_read_register(p, Rd+1);
-						arm_write_word(p, Vn, Vd);
-					}
-					else if(B){
-						arm_write_byte(p, Vn, Vd);
-					}
-					else{
-						arm_write_word(p, Vn, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn) - arm_read_register(p, Rm);
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn) - shift(p,ins);
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-			/* +offset */
-			else{
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn) + immediate;
-					Vd = arm_read_register(p, Rd);
-					if(H){
-						arm_write_half(p, Vn, Vd);
-					}
-					else if(D && Rd<14){
-						arm_write_word(p, Vn, Vd);
-						Vn += 4;
-						Vd = arm_read_register(p, Rd+1);
-						arm_write_word(p, Vn, Vd);
-					}
-					else if(B){
-					arm_write_byte(p, Vn, Vd);
-					}
-					else{
-						arm_write_word(p, Vn, Vd);
-					}	
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn) + arm_read_register(p, Rm);
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn) + shift(p,ins);
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-		}
-		/* the base register is updated */
+    if(!I){
+		if(!P){
+			Vn = arm_read_register(p, Rn);
+			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,immediate,U)); }
+			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,immediate,U)); }
+		}	
 		else{
-			/* -offset */
-			if(!U){
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn) - immediate;
-					arm_write_register(p,Rn,Vn);
-					Vd = arm_read_register(p, Rd);
-					if(H){
-						arm_write_half(p, Vn, Vd);
-					}
-					else if(D && Rd<14){
-						arm_write_word(p, Vn, Vd);
-						Vn += 4;
-						Vd = arm_read_register(p, Rd+1);
-						arm_write_word(p, Vn, Vd);
-					}
-					else if(B){
-					arm_write_byte(p, Vn, Vd);
-					}
-					else{
-						arm_write_word(p, Vn, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn) - arm_read_register(p, Rm);
-						arm_write_register(p,Rn,Vn);
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn) - shift(p,ins);
-						arm_write_register(p,Rn,Vn);
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-			/* +offset */
-			else{
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn) + immediate;
-					arm_write_register(p,Rn,Vn);
-					Vd = arm_read_register(p, Rd);
-					if(H){
-						arm_write_half(p, Vn, Vd);
-					}
-					else if(D && Rd<14){
-						arm_write_word(p, Vn, Vd);
-						Vn += 4;
-						Vd = arm_read_register(p, Rd+1);
-						arm_write_word(p, Vn, Vd);
-					}
-					else if(B){
-					arm_write_byte(p, Vn, Vd);
-					}
-					else{
-						arm_write_word(p, Vn, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn) + arm_read_register(p, Rm);
-						arm_write_register(p,Rn,Vn);
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn) + shift(p,ins);
-						arm_write_register(p,Rn,Vn);
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-					}
-				}
-			}
+			Vn = offsetHandling(arm_read_register(p,Rn),immediate,U);				
+			if(!W){ arm_write_register(p,Rn,Vn); }
+		}
+    }
+    else{
+		if(!P){
+			Vn = arm_read_register(p, Rn);
+			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,ins),U)); }
+			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,ins),U)); }
+		}	
+		else{
+			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,ins),U);				
+			if(!W){ arm_write_register(p,Rn,Vn); }
 		}
 	}
-	/* post-indexed addressing */
+	if(!P && !W){
+		Vd = arm_read_usr_register(p, Rd);
+	} else {
+		Vd = arm_read_register(p, Rd);
+	}
+	if(H){
+		if(Vn%2==0){
+			error |= arm_write_half(p, Vn, Vd);
+		} else {
+			error |= -1;
+		}
+	}
+	else if(D && Rd<14){
+		if(Vn%4==0)
+		{
+			error |= arm_write_word(p, Vn, Vd);
+			Vn += 4;
+			if(!P && !W){
+				Vd = arm_read_usr_register(p, Rd+1);
+			} else {
+				Vd = arm_read_register(p, Rd+1);
+			}
+			Vd = arm_read_register(p, Rd+1);
+			error |= arm_write_word(p, Vn, Vd);
+		} else {
+			error |= -1;
+		}
+	}
+	else if(B){
+		error |= arm_write_byte(p, Vn, Vd);
+	}
 	else{
-		/* normal memory access */
-		if(W){
-			/* -offset */
-			if(!U){
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn);
-					arm_write_register(p,Rn,Vn - immediate);
-					Vd = arm_read_register(p, Rd);
-					if(H){
-						arm_write_half(p, Vn, Vd);
-					}
-					else if(D && Rd<14){
-						arm_write_word(p, Vn, Vd);
-						Vn += 4;
-						Vd = arm_read_register(p, Rd+1);
-						arm_write_word(p, Vn, Vd);
-					}
-					else if(B){
-					arm_write_byte(p, Vn, Vd);
-					}
-					else{
-						arm_write_word(p, Vn, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn);
-			    		arm_write_register(p,Rn,Vn - arm_read_register(p, Rm));
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn);
-			    		arm_write_register(p,Rn,Vn - shift(p,ins));
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-			/* +offset */
-			else{
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_register(p, Rn);
-					arm_write_register(p,Rn,Vn + immediate);
-					Vd = arm_read_register(p, Rd);
-					if(H){
-						arm_write_half(p, Vn, Vd);
-					}
-					else if(D && Rd<14){
-						arm_write_word(p, Vn, Vd);
-						Vn += 4;
-						Vd = arm_read_register(p, Rd+1);
-						arm_write_word(p, Vn, Vd);
-					}
-					else if(B){
-					arm_write_byte(p, Vn, Vd);
-					}
-					else{
-						arm_write_word(p, Vn, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_register(p, Rn);
-			    		arm_write_register(p,Rn,Vn + arm_read_register(p, Rm));
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_register(p, Rn);
-			    		arm_write_register(p,Rn,Vn + shift(p,ins));
-						Vd = arm_read_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-		}
-		/* User mode memory access */
-		else{
-			/* -offset */
-			if(!U){
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_usr_register(p, Rn);
-					arm_write_usr_register(p,Rn,Vn - immediate);
-					Vd = arm_read_usr_register(p, Rd);
-					if(H){
-						arm_write_half(p, Vn, Vd);
-					}
-					else if(D && Rd<14){
-						arm_write_word(p, Vn, Vd);
-						Vn += 4;
-						Vd = arm_read_register(p, Rd+1);
-						arm_write_word(p, Vn, Vd);
-					}
-					else if(B){
-					arm_write_byte(p, Vn, Vd);
-					}
-					else{
-						arm_write_word(p, Vn, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_usr_register(p, Rn);
-						arm_write_usr_register(p,Rn,Vn - arm_read_register(p, Rm));
-						Vd = arm_read_usr_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_usr_register(p, Rn);
-						arm_write_usr_register(p,Rn,Vn - shift(p,ins));
-						Vd = arm_read_usr_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-					}
-				}
-			}
-			/* +offset */
-			else{
-			 	/* immediate offset */
-			    if(!I){
-					Vn = arm_read_usr_register(p, Rn);
-					arm_write_usr_register(p,Rn,Vn + immediate);
-					Vd = arm_read_usr_register(p, Rd);
-					if(H){
-						arm_write_half(p, Vn, Vd);
-					}
-					else if(D && Rd<14){
-						arm_write_word(p, Vn, Vd);
-						Vn += 4;
-						Vd = arm_read_register(p, Rd+1);
-						arm_write_word(p, Vn, Vd);
-					}
-					else if(B){
-					arm_write_byte(p, Vn, Vd);
-					}
-					else{
-						arm_write_word(p, Vn, Vd);
-					}
-					return 0;
-			    }
-			    /* register/scaled register offset */
-			    else{
-			    	/* register register offset */
-			    	if(shift == 0 && shift_amount == 0){
-			    		Vn = arm_read_usr_register(p, Rn);
-						arm_write_usr_register(p,Rn,Vn + arm_read_register(p, Rm));
-						Vd = arm_read_usr_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-			    	}
-			    	/* scaled register offset */ 
-			    	else{
-			    		Vn = arm_read_usr_register(p, Rn);
-						arm_write_usr_register(p,Rn,Vn + shift(p,ins));
-						Vd = arm_read_usr_register(p, Rd);
-						if(H){
-							arm_write_half(p, Vn, Vd);
-						}
-						else if(D && Rd<14){
-							arm_write_word(p, Vn, Vd);
-							Vn += 4;
-							Vd = arm_read_register(p, Rd+1);
-							arm_write_word(p, Vn, Vd);
-						}
-						else if(B){
-							arm_write_byte(p, Vn, Vd);
-						}
-						else{
-							arm_write_word(p, Vn, Vd);
-						}
-						return 0;
-					}
-				}
-			}
+		if(Vn%4==0){
+			error |= arm_write_word(p, Vn, Vd);
+		} else {
+			error |= -1;
 		}
 	}
-	return -1;
+	
+	return 0;
 }
