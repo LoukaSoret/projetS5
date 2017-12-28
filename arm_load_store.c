@@ -29,14 +29,14 @@ Contact: Guillaume.Huard@imag.fr
 #include "arm_core.h"
 #include "decodeur_cond_shift.h"
 
-/*
+/*************************************************************
 Auteur : Louka
 Date : 22/12/17
-Specification:
-Entrees: coeur p , instruction ins sur 32bits
-Sorties: 
-
-*/
+Spec: Prends en entree le coeur arm p et l'instruction ins
+renvois le code d'erreur 0 si tout c'est bien passe. modifie
+l'etat des registres et de la memoire en fonction de 
+l'instruction par effets de bords.
+*************************************************************/
 int arm_load_store(arm_core p, uint32_t ins) {
 	uint8_t Rn,Rd,shift_amount,shift_codeOp,Rm,P,U,I,B,W,L,codeOp;;
     uint16_t immediate;
@@ -160,6 +160,12 @@ int arm_coprocessor_load_store(arm_core p, uint32_t ins) {
     return -1;
 }
 
+/**************************************************************
+Auteur : Louka
+Date : 23/12/2017
+Spec : Prends en argument une adresse, un offset et un bit U
+et renvois adresse + offset si U=1 ou adresse + offset si U=0
+***************************************************************/
 int offsetHandling(int address,int offset,uint8_t U){
 	if(U){
 		return address + offset;
@@ -168,6 +174,12 @@ int offsetHandling(int address,int offset,uint8_t U){
 	}
 }
 
+/***************************************************************
+Auteur : Louka
+Date : 23/12/2017
+Spec : Gere les cas des load et store pour signed bytes, double
+words et signed et unsigned half words.
+****************************************************************/
 int arm_load_store_half_double(arm_core p,uint32_t ins)
 {
 	uint8_t Rn,Rd,shift_amount,shift_codeOp,Rm,P,U,I,W,L,S,H,tst;
@@ -218,7 +230,17 @@ int arm_load_store_half_double(arm_core p,uint32_t ins)
     }
 }
 
-int arm_load(arm_core p,uint32_t ins,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift_codeOp,uint8_t Rm)
+/**************************************************************************
+Auteur : Louka
+Date : 23/12/2017
+Spec : Gestion de toutes les instructions de type load.Prends en arguments
+un coeur arm p, les registres Rn (adresse), Rd(destination) et Rs(shift),
+le code op shift_codeOp, la valeur immediate shift_imm, et les bits 
+I(immediate offset),P(addressing mode),U(+/- offset),B(byte/word access),
+W(addressing mode),D(half/double word access). Renvois 0 si tout c'est bien
+passe. Modifie les registres et la memoire par effets de bords.
+****************************************************************************/
+int arm_load(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift_codeOp,uint8_t Rm)
 {
 	int error=0;
 	uint8_t VdByte;
@@ -239,11 +261,11 @@ int arm_load(arm_core p,uint32_t ins,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,u
     else{
 		if(!P){
 			Vn = arm_read_register(p, Rn);
-			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,ins),U)); }
-			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,ins),U)); }
+			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,shift_codeOp,shift_imm,Rm,0,0),U)); }
+			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,shift_codeOp,shift_imm,Rm,0,0),U)); }
 		}	
 		else{
-			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,ins),U);				
+			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,shift_codeOp,shift_imm,Rm,0,0),U);				
 			if(!W){ arm_write_register(p,Rn,Vn); }
 		}
 	}
@@ -301,7 +323,18 @@ int arm_load(arm_core p,uint32_t ins,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,u
 	return error;
 }
 
-int arm_store(arm_core p,uint32_t ins,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift_codeOp,uint8_t Rm) {
+
+/**************************************************************************
+Auteur : Louka
+Date : 23/12/2017
+Spec : Gestion de toutes les instructions de type store.Prends en arguments
+un coeur arm p, les registres Rn (adresse), Rd(destination) et Rs(shift),
+le code op shift_codeOp, la valeur immediate shift_imm, et les bits 
+I(immediate offset),P(addressing mode),U(+/- offset),B(byte/word access),
+W(addressing mode),D(half/double word access). Renvois 0 si tout c'est bien
+passe. Modifie les registres et la memoire par effets de bords.
+****************************************************************************/
+int arm_store(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint8_t B,uint8_t W ,uint8_t H,uint8_t D,uint16_t immediate,uint8_t shift_amount,uint8_t shift_codeOp,uint8_t Rm) {
 	int error=0;
 	uint32_t Vn,Vd;
     
@@ -319,11 +352,11 @@ int arm_store(arm_core p,uint32_t ins,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,
     else{
 		if(!P){
 			Vn = arm_read_register(p, Rn);
-			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,ins),U)); }
-			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,ins),U)); }
+			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,shift,shift_imm,Rm,0,0),U)); }
+			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,shift,shift_imm,Rm,0,0),U)); }
 		}	
 		else{
-			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,ins),U);				
+			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,shift,shift_imm,Rm,0,0),U);				
 			if(!W){ arm_write_register(p,Rn,Vn); }
 		}
 	}

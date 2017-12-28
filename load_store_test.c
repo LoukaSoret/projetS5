@@ -14,6 +14,11 @@ void compare(uint32_t a, uint32_t b) {
     }
 }
 
+/*********************************************
+Auteur: Louka
+Date: 28/12/2017
+Spec: Programme de test pour arm_load_store.c
+**********************************************/
 int main(void){
 	char *endianess[] = { "little", "big" };
 	int returnValue;
