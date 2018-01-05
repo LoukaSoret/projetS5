@@ -32,6 +32,13 @@ struct memory_data {
     
 };
 
+/********************************************************
+Auteur : Louka
+Date : 18/12/2017
+Spec: Prends en argument la taille de la memoire et son
+endianness et renvois une memoire avec les specifications
+demandees.
+*********************************************************/
 memory memory_create(size_t size, int is_big_endian) {
     memory mem;
     uint8_t *data = malloc(size*sizeof(uint8_t));
@@ -46,10 +53,20 @@ memory memory_create(size_t size, int is_big_endian) {
     return mem;
 }
 
+/****************************************
+Auteur: Louka
+Date: 18/12/2017
+Spec: donne la taille de la memoire mem.
+*****************************************/
 size_t memory_get_size(memory mem) {
     return mem->size;
 }
 
+/****************************************
+Auteur: Louka
+Date: 18/12/2017
+Spec: libere la memoire allouee pour mem.
+*****************************************/
 void memory_destroy(memory mem) {
     free(mem->data);
     mem->size=0;
@@ -57,6 +74,13 @@ void memory_destroy(memory mem) {
     free(mem);
 }
 
+
+/**************************************************************
+Auteur: Kirill
+Date: 18/12/2017
+Spec: Stock la valeur du byte de la memoire a l'adresse adress
+dans value. Renvois 0 si tout c'est bien passe -1 sinon.
+***************************************************************/
 int memory_read_byte(memory mem, uint32_t address, uint8_t *value) {
     if(address >= 0 && address < mem->size){
         *value = mem->data[address];
@@ -65,6 +89,13 @@ int memory_read_byte(memory mem, uint32_t address, uint8_t *value) {
     return -1;
 }
 
+/********************************************************************
+Auteur: Kirill (+Louka)
+Date: 18/12/2017
+Spec: Stock la valeur du half word de la memoire a l'adresse
+adress dans value. Renvois 0 si tout c'est bien passe -1 en cas
+d'erreur d'access memoire et 1 en cas de désalignement de la memoire.
+*********************************************************************/
 int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
     uint8_t frst_half;
     uint8_t scnd_half;
@@ -73,6 +104,9 @@ int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
     ctrl2 = memory_read_byte(mem,address+1,&scnd_half);
     if (ctrl1 || ctrl2){
         return -1;
+    }
+    else if(address%2 != 0){
+        return 1;
     }
     if(mem->endianess){
         *value = (uint16_t)((((uint16_t) frst_half)<<8) | scnd_half);
@@ -83,6 +117,12 @@ int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
     return 0;
 }
 
+/*
+Auteur: Kirill (+Louka)
+Date: 18/12/2017
+Spec: Stock la valeur du word de la memoire a l'adresse
+adress dans value. Renvois 0 si tout c'est bien passe -1 sinon.
+*/
 int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
     uint16_t frst_half ;
     uint16_t scnd_half;
@@ -91,6 +131,9 @@ int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
     ctrl2 = memory_read_half(mem,address+2,&scnd_half);
     if (ctrl1 || ctrl2){
         return -1;
+    }
+    else if(address%4 != 0){
+        return 1;
     }
     if(mem->endianess){
         *value = (uint32_t)((((uint32_t) frst_half)<<16) | scnd_half);
@@ -101,6 +144,12 @@ int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
     return 0;
 }
 
+/************************************************************************
+Auteur: Kirill
+Date: 18/12/2017
+Spec: Stock la valeur du byte contenue dans value dans la  memoire a 
+l'adresse adress. Renvois 0 si tout c'est bien passe -1 sinon.
+*************************************************************************/
 int memory_write_byte(memory mem, uint32_t address, uint8_t value) {
     if(address >= 0 && address < mem->size){
         mem->data[address]=value;
@@ -109,8 +158,17 @@ int memory_write_byte(memory mem, uint32_t address, uint8_t value) {
     return -1;
 }
 
+/************************************************************************
+Auteur: Kirill (+Louka)
+Date: 18/12/2017
+Spec: Stock la valeur du half word contenue dans value dans la  memoire a
+l'adresse adress. Renvois 0 si tout c'est bien passe -1 sinon.
+*************************************************************************/
 int memory_write_half(memory mem, uint32_t address, uint16_t value) {
     int res;
+    if(address%2 != 0){
+        return 1;
+    }
     if(mem->endianess){
         res = memory_write_byte(mem,address,((uint8_t)((value >> 8) & 0xff)));
         res |= memory_write_byte(mem,address+1,((uint8_t)((value) & 0xff)));
@@ -122,8 +180,17 @@ int memory_write_half(memory mem, uint32_t address, uint16_t value) {
     return res;
 }
 
+/************************************************************************
+Auteur: Kirill (+Louka)
+Date: 18/12/2017
+Spec: Stock la valeur du word contenue dans value dans la memoire a 
+l'adresse adress. Renvois 0 si tout c'est bien passe -1 sinon.
+*************************************************************************/
 int memory_write_word(memory mem, uint32_t address, uint32_t value) {
     int res;
+    if(address%4 != 0){
+        return 1;
+    }
     if(mem->endianess){
         res = memory_write_half(mem,address,((uint16_t)((value>>16) & 0xffff)));
         res |= memory_write_half(mem,address+2,(uint16_t)((value) & 0xffff));

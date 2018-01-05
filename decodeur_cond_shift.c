@@ -11,59 +11,70 @@ int condition(arm_core p, uint8_t ins){
 	
 }
 
-int shift(arm_core p, uint16_t ins){
-	int shift = get_bits(ins,6,5);
-	int shift_imm = get_bits(ins,11,7);
-	int8_t reg = get_bits(ins,3,0);
-	int32_t value_reg = arm_read_register(p,reg);
-	if(get_bit(ins,4)){
-		int regs = get_bits(ins,11,8);
-		uint32_t regs_value = arm_read_register(p,regs);
+
+/*************************************************************************
+Auteur : Kirill (+Louka modifications)
+Date : 28/12/2017
+
+Spec : Prends en argument le code op shift la valeur immediate shift_imm
+le registre d'offset Rm re registre de shift Rs et le bit I qui determine
+si le shift est execute avec shift_imm (0) ou avec Rs (1). Renvois la
+valeur de Rm shiftee.
+**************************************************************************/
+int shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uint8_t I)
+{
+	int32_t Rm_value = arm_read_register(p,Rm);
+	uint32_t Rs_value;
+
+	// mem[Rm] shift mem[Rs]  
+	if(I){
+		Rs_value = arm_read_register(p,Rs);
 		switch(shift){
 			case LSL: // Shift left immediat
-				return value_reg<<regs_value;
+				return Rm_value<<regs_value;
 			break;
 
 			case LSR: //Shit right immediat
 				if(regs_value > 0){
-					return value_reg>>regs_value;
+					return Rm_value>>regs_value;
 				}else{
-					return value_reg;
+					return Rm_value;
 				}
 			break;
 
 			case ASR: // Shift arithmétique immediat
-				return asr(value_reg,regs_value);
+				return asr(Rm_value,regs_value);
 			break;
 
 			case ROR: // Rotation immediat
-				return ror(value_reg,regs_value);
+				return ror(Rm_value,regs_value);
 			break;
 
 			default:
 				return 0;
 			break;
 		}
+	// mem[Rm] shift imm_shift
 	}else{
 		switch(shift){
 			case LSL: // Shift left immediat
-				return value_reg<<shift_imm;
+				return Rm_value<<shift_imm;
 			break;
 
 			case LSR: //Shit right immediat
 				if(shift_imm > 0){
-					return value_reg>>shift_imm;
+					return Rm_value>>shift_imm;
 				}else{
-					return value_reg;
+					return Rm_value;
 				}
 			break;
 
 			case ASR: // Shift arithmétique immediat
-				return asr(value_reg,shift_imm);
+				return asr(Rm_value,shift_imm);
 			break;
 
 			case ROR: // Rotation immediat
-				return ror(value_reg,shift_imm);
+				return ror(Rm_value,shift_imm);
 			break;
 
 			default:

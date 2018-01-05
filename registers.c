@@ -33,7 +33,7 @@ struct registers_data {
 
 registers registers_create() {
 	registers r = malloc(sizeof(uint32_t)*18+sizeof(uint8_t));
-	r->mode = 16; 
+	r->mode = 16;
 	return r;
 }
 
@@ -66,11 +66,11 @@ int in_a_privileged_mode(registers r) {
 }
 
 uint32_t read_register(registers r, uint8_t reg) {
-	if(reg < 16 && reg >=0){
+	if(reg>=0 && reg<16){
 		return r->reg_no[reg];
 	}
 	else{
-		return -1 ;
+		return -1;
 	}
 }
 

@@ -29,6 +29,87 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 
 static int arm_execute_instruction(arm_core p) {
+    uint32_t instruction,error;
+    error = arm_fetch(p, &instruction);
+    if(error){
+    	printf("Erreur lors du fetch en memoire de l'istruction courante.\n");
+    	return 1;
+    }
+    else{
+    	switch(get_bits(instruction, 27, 25))
+    	{
+    		case 0b000:
+    			switch((get_bits(instruction,24,23)<<3) | (get_bit(instruction,7))<<2 | (get_bit(instruction,4))<<1 | (get_bit(instruction,20)) ){
+    				case 0b10010:
+                    case 0b10000:
+                    case 0b10100:
+    					arm_miscellaneous(p, instruction);
+    					break;
+    				default:
+    					if (get_bit(instruction,4) && get_bit(instruction,7)){
+    						if(get_bits(instruction,6,5)){
+                                /* Extra load/stores for signed bytes, halfwords and doublewords */
+                                arm_load_store(p, instruction);
+                            }
+                            else{
+                                /* Multiplies */
+                            }
+    					}
+    					else{
+    						/* Data processing register/immediate shift */
+    						arm_data_processing_shift(p, instruction);
+    					}
+    					break;
+    			}
+    			break;
+    		case 0b001:
+    			switch(get_bits(instruction,24,20))
+    			{
+    				case 0b10010:
+    				case 0b10110:
+    					/* Move immediate to status register */
+    					break;
+    				case 0b10000:
+    				case 0b10100:
+    					/* Undefined instruction  */
+    					break;
+    				default:
+    					/* Data processing immediate */
+    					arm_data_processing_immediate_msr(p,instruction);
+    					break;
+    			}
+    			break;
+    		case 0b010:
+    			/* Load/store immediate offset */
+    			arm_load_store(p, instruction);
+    			break;
+    		case 0b011:
+    			if (get_bit(instruction,4)){
+    				/* Media instructions */
+    				break;
+    			}
+    			else{
+    				/* Load/store register offset */
+    				arm_load_store(p, instruction);
+    				break;
+    			}
+    			break;
+    		case 0b100:
+    			/* Load/store multiple */
+    			arm_load_store_multiple(p, instruction);
+    		case 0b101:
+    			/* Branch and branch with link */
+    			arm_branch(p, instruction);
+    		case 0b110:
+    			/* Coprocessor load/store and double register transfers */
+    			arm_coprocessor_load_store(p, instruction);
+    		case 0b111:
+    			/* Coprocessor data/registers processing and Software interrupt */
+    			arm_coprocessor_others_swi(p, instruction);
+    		default:
+    			break;
+    	}
+    }
     return 0;
 }
 
