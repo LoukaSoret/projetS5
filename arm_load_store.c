@@ -31,7 +31,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
 }
 
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
-    
+    return UNDEFINED_INSTRUCTION;
 }
 
 int arm_coprocessor_load_store(arm_core p, uint32_t ins) {
