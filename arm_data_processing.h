@@ -25,6 +25,24 @@ Contact: Guillaume.Huard@imag.fr
 #include <stdint.h>
 #include "arm_core.h"
 
+void and_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh);
+void sub_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh);
+void add_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh);
+void eor_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh);
+void rsb_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh);
+void adc_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh);
+void sbc_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh);
+void rsc_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh);
+void orr_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh);
+void mov_processing(arm_core p,uint8_t rd,int val_sh);
+void bic_processing(arm_core p,uint8_t rn,uint8_t rd, int val_sh);
+void mvn_processing(arm_core p,uint8_t rd,int val_sh);
+void tst_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh);
+void teq_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh);
+void cmp_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh);
+void cmn_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh);
+void maj_ZNCV(arm_core p,uint32_t value);
+
 int arm_data_processing_shift(arm_core p, uint32_t ins);
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins);
 
