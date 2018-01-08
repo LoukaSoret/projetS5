@@ -10,7 +10,6 @@ int read_V(arm_core p);
 int condition(arm_core p, uint8_t cond);
 
 
-
 /*************************************************************************
 Auteur : Kirill (+Louka modifications)
 Date : 28/12/2017

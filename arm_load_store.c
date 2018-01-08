@@ -67,10 +67,10 @@ int arm_load_store(arm_core p, uint32_t ins) {
     	/* Load and store for bytes and words */
     	if(codeOp){
     		if(L){
-    			return arm_load(p,ins,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift_codeOp,Rm);
+    			return arm_load(p,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift_codeOp,Rm);
     		}
     		else{
-    			return arm_store(p,ins,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift_codeOp,Rm);
+    			return arm_store(p,Rn,Rd,I,P,U,B,W,0,0,immediate,shift_amount,shift_codeOp,Rm);
     		}
     	}
     	/* Load and store for half-words and double-words */
@@ -208,24 +208,24 @@ int arm_load_store_half_double(arm_core p,uint32_t ins)
     {
     	/* L=0, S=0, H=1 Store halfword. */
     	case 0b001 :
-    		return arm_load(p,ins,Rn,Rd,I,P,U,0,W,1,0,immediate,shift_amount,shift_codeOp,Rm);
+    		return arm_load(p,Rn,Rd,I,P,U,0,W,1,0,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	/* L=0, S=1, H=0 Load doubleword. */
     	case 0b010 :
-    		return arm_load(p,ins,Rn,Rd,I,P,U,1,W,0,1,immediate,shift_amount,shift_codeOp,Rm);
+    		return arm_load(p,Rn,Rd,I,P,U,1,W,0,1,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	/* L=0, S=1, H=1 Store doubleword. */
     	case 0b011 :
-    		return arm_load(p,ins,Rn,Rd,I,P,U,0,W,0,1,immediate,shift_amount,shift_codeOp,Rm);
+    		return arm_load(p,Rn,Rd,I,P,U,0,W,0,1,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	/* L=1, S=0, H=1 Load unsigned halfword. */
     	case 0b111 :
     	case 0b101 :
-    		return arm_load(p,ins,Rn,Rd,I,P,U,1,W,1,0,immediate,shift_amount,shift_codeOp,Rm);
+    		return arm_load(p,Rn,Rd,I,P,U,1,W,1,0,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	/* L=1, S=1, H=0 Load signed byte. */
     	case 0b110 :
-    		return arm_load(p,ins,Rn,Rd,I,P,U,1,W,0,0,immediate,shift_amount,shift_codeOp,Rm);
+    		return arm_load(p,Rn,Rd,I,P,U,1,W,0,0,immediate,shift_amount,shift_codeOp,Rm);
     		break;
     	default :
     		return -1;
@@ -238,7 +238,7 @@ Auteur : Louka
 Date : 23/12/2017
 Spec : Gestion de toutes les instructions de type load.Prends en arguments
 un coeur arm p, les registres Rn (adresse), Rd(destination) et Rs(shift),
-le code op shift_codeOp, la valeur immediate shift_imm, et les bits 
+le code op shift_codeOp, la valeur immediate shift_amount, et les bits 
 I(immediate offset),P(addressing mode),U(+/- offset),B(byte/word access),
 W(addressing mode),D(half/double word access). Renvois 0 si tout c'est bien
 passe. Modifie les registres et la memoire par effets de bords.
@@ -264,43 +264,35 @@ int arm_load(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint
     else{
 		if(!P){
 			Vn = arm_read_register(p, Rn);
-			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,shift_codeOp,shift_imm,Rm,0,0),U)); }
-			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,shift_codeOp,shift_imm,Rm,0,0),U)); }
+			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,shift_codeOp,shift_amount,Rm,0,0),U)); }
+			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,shift_codeOp,shift_amount,Rm,0,0),U)); }
 		}	
 		else{
-			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,shift_codeOp,shift_imm,Rm,0,0),U);				
+			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,shift_codeOp,shift_amount,Rm,0,0),U);				
 			if(!W){ arm_write_register(p,Rn,Vn); }
 		}
 	}
 	if(H){
-		if(Vn%2==0){
-			error |= arm_read_half(p, Vn, &VdHalf);
-			if(!P && !W){
-				arm_write_usr_register(p, Rd, VdHalf);
-			} else{
-				arm_write_register(p, Rd, VdHalf);
-			}
-		} else {
-			error |= -1;
+		error |= arm_read_half(p, Vn, &VdHalf);
+		if(!P && !W){
+			arm_write_usr_register(p, Rd, VdHalf);
+		} else{
+			arm_write_register(p, Rd, VdHalf);
 		}
 	}
 	else if(D && Rd<14){
-		if(Vn%4==0){
-			if(!P && !W){ 
-				error |= arm_read_word(p, Vn, &Vd);
-				arm_write_usr_register(p, Rd, Vd);
-				Vn += 4;
-				error |= arm_read_word(p, Vn, &Vd);
-				arm_write_usr_register(p, Rd+1, Vd);
-			} else {
-				error |= arm_read_word(p, Vn, &Vd);
-				arm_write_register(p, Rd, Vd);
-				Vn += 4;
-				error |= arm_read_word(p, Vn, &Vd);
-				arm_write_register(p, Rd+1, Vd);			
-			}
+		if(!P && !W){ 
+			error |= arm_read_word(p, Vn, &Vd);
+			arm_write_usr_register(p, Rd, Vd);
+			Vn += 4;
+			error |= arm_read_word(p, Vn, &Vd);
+			arm_write_usr_register(p, Rd+1, Vd);
 		} else {
-			error |= -1;
+			error |= arm_read_word(p, Vn, &Vd);
+			arm_write_register(p, Rd, Vd);
+			Vn += 4;
+			error |= arm_read_word(p, Vn, &Vd);
+			arm_write_register(p, Rd+1, Vd);		
 		}
 	}
 	else if(B){
@@ -312,15 +304,11 @@ int arm_load(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint
 		}
 	}
 	else{
-		if(Vn%4==0){
-			error |= arm_read_word(p, Vn, &Vd);
-			if(!P && !W){
-				arm_write_usr_register(p, Rd, Vd);
-			} else{
-				arm_write_register(p, Rd, Vd);
-			}
-		} else {
-			error |= -1;
+		error |= arm_read_word(p, Vn, &Vd);
+		if(!P && !W){
+			arm_write_usr_register(p, Rd, Vd);
+		} else{
+			arm_write_register(p, Rd, Vd);
 		}
 	}
 	return error;
@@ -332,7 +320,7 @@ Auteur : Louka
 Date : 23/12/2017
 Spec : Gestion de toutes les instructions de type store.Prends en arguments
 un coeur arm p, les registres Rn (adresse), Rd(destination) et Rs(shift),
-le code op shift_codeOp, la valeur immediate shift_imm, et les bits 
+le code op shift_codeOp, la valeur immediate shift_amount, et les bits 
 I(immediate offset),P(addressing mode),U(+/- offset),B(byte/word access),
 W(addressing mode),D(half/double word access). Renvois 0 si tout c'est bien
 passe. Modifie les registres et la memoire par effets de bords.
@@ -355,11 +343,11 @@ int arm_store(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uin
     else{
 		if(!P){
 			Vn = arm_read_register(p, Rn);
-			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,shift,shift_imm,Rm,0,0),U)); }
-			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,shift,shift_imm,Rm,0,0),U)); }
+			if(W){ arm_write_register(p,Rn,offsetHandling(Vn,shift(p,shift_codeOp,shift_amount,Rm,0,0),U)); }
+			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,shift_codeOp,shift_amount,Rm,0,0),U)); }
 		}	
 		else{
-			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,shift,shift_imm,Rm,0,0),U);				
+			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,shift_codeOp,shift_amount,Rm,0,0),U);				
 			if(!W){ arm_write_register(p,Rn,Vn); }
 		}
 	}
@@ -369,37 +357,24 @@ int arm_store(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uin
 		Vd = arm_read_register(p, Rd);
 	}
 	if(H){
-		if(Vn%2==0){
-			error |= arm_write_half(p, Vn, Vd);
-		} else {
-			error |= -1;
-		}
+		error |= arm_write_half(p, Vn, Vd);
 	}
 	else if(D && Rd<14){
-		if(Vn%4==0)
-		{
-			error |= arm_write_word(p, Vn, Vd);
-			Vn += 4;
-			if(!P && !W){
-				Vd = arm_read_usr_register(p, Rd+1);
-			} else {
-				Vd = arm_read_register(p, Rd+1);
-			}
-			Vd = arm_read_register(p, Rd+1);
-			error |= arm_write_word(p, Vn, Vd);
+		error |= arm_write_word(p, Vn, Vd);
+		Vn += 4;
+		if(!P && !W){
+			Vd = arm_read_usr_register(p, Rd+1);
 		} else {
-			error |= -1;
+			Vd = arm_read_register(p, Rd+1);
 		}
+		Vd = arm_read_register(p, Rd+1);
+		error |= arm_write_word(p, Vn, Vd);
 	}
 	else if(B){
 		error |= arm_write_byte(p, Vn, Vd);
 	}
 	else{
-		if(Vn%4==0){
-			error |= arm_write_word(p, Vn, Vd);
-		} else {
-			error |= -1;
-		}
+		error |= arm_write_word(p, Vn, Vd);
 	}
 	
 	return 0;
