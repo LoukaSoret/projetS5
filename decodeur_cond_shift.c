@@ -173,73 +173,67 @@ int condition(arm_core p, uint8_t cond){
 	return 0;
 }
 
-int shift(arm_core p, uint16_t ins){
-	int shift = get_bits(ins,6,4);
-	int shift_imm = get_bits(ins,11,7);
-	int8_t reg = get_bits(ins,3,0);
-	int32_t value_reg = arm_read_register(p,reg);
-	int value = 0;
-	switch(shift){
-		case LSL: // Shift left immediat
-			if(shift_imm > 0){
-				value = value_reg<<shift_imm;
-			}else{
-				value = value_reg;
-			}
-			return value;
-		break;
+int shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uint8_t I)
+{
+	int32_t Rm_value = arm_read_register(p,Rm);
+	uint32_t Rs_value;
 
-		case LSLr: // Shift left avec registre
-			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
-			if(regs < 32){
-				value = value_reg<<regs;
-			}else if(regs == 0){
-				value = value_reg;
-			}else{
-				value = 0;
-			}
-			return value;
-		break;
+	// mem[Rm] shift mem[Rs]  
+	if(I){
+		Rs_value = arm_read_register(p,Rs);
+		switch(shift){
+			case LSL: // Shift left immediat
+				return Rm_value<<Rs_value;
+			break;
 
-		case LSR: //Shit right immediat
-			if(shift_imm > 0){
-				value = value_reg>>shift_imm;
-			}else{
-				value = value_reg;
-			}
-			return value;
-		break;
+			case LSR: //Shit right immediat
+				if(Rs_value > 0){
+					return Rm_value>>Rs_value;
+				}else{
+					return Rm_value;
+				}
+			break;
 
-		case LSRr: // Shift right avec registre
-			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
-			if(regs < 32){
-				value = value_reg>>regs;
-			}else if(regs == 0){
-				value = value_reg;
-			}else{
-				value = 0;
-			}
-			return value;
-		break;
+			case ASR: // Shift arithmétique immediat
+				return asr(Rm_value,Rs_value);
+			break;
 
-		case ASR: // Shift arithmétique immediat
-			return asr(value_reg,shift_imm);
-		break;
+			case ROR: // Rotation immediat
+				return ror(Rm_value,Rs_value);
+			break;
 
-		case ASRr: // Shift arithmétique avec registre
-			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
-			return ror(value_reg,regs);
-		break;
+			default:
+				return 0;
+			break;
+		}
+	// mem[Rm] shift imm_shift
+	}else{
+		switch(shift){
+			case LSL: // Shift left immediat
+				return Rm_value<<shift_imm;
+			break;
 
-		case ROR: // Rotation immediat
-			return ror(value_reg,shift_imm);
-		break;
+			case LSR: //Shit right immediat
+				if(shift_imm > 0){
+					return Rm_value>>shift_imm;
+				}else{
+					return Rm_value;
+				}
+			break;
 
-		case RORr: // rotation avec registre
-			int8_t regs = get_bits(arm_read_register(p,get_bits(ins,11,8)),7,0);
-			return ror(value_reg,regs);
-		break;
+			case ASR: // Shift arithmétique immediat
+				return asr(Rm_value,shift_imm);
+			break;
+
+			case ROR: // Rotation immediat
+				return ror(Rm_value,shift_imm);
+			break;
+
+			default:
+				return 0;
+			break;
+		}
 	}
+	return 0;
 }
-
 

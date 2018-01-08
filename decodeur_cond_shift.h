@@ -8,6 +8,6 @@ int read_Z(arm_core p);
 int read_C(arm_core p);
 int read_V(arm_core p);
 int condition(arm_core p, uint8_t cond);
-int shift(arm_core p, uint16_t ins);
+int shift(arm_core p, uint8_t shift, uint8_t shift_imm, uint8_t Rm, uint8_t Rs, uint8_t I);
 
 #endif
