@@ -31,23 +31,23 @@ int shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uin
 		Rs_value = arm_read_register(p,Rs);
 		switch(shift){
 			case LSL: // Shift left immediat
-				return Rm_value<<regs_value;
+				return Rm_value<<Rs_value;
 			break;
 
 			case LSR: //Shit right immediat
-				if(regs_value > 0){
-					return Rm_value>>regs_value;
+				if(Rs_value > 0){
+					return Rm_value>>Rs_value;
 				}else{
 					return Rm_value;
 				}
 			break;
 
 			case ASR: // Shift arithmétique immediat
-				return asr(Rm_value,regs_value);
+				return asr(Rm_value,Rs_value);
 			break;
 
 			case ROR: // Rotation immediat
-				return ror(Rm_value,regs_value);
+				return ror(Rm_value,Rs_value);
 			break;
 
 			default:
@@ -82,5 +82,5 @@ int shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uin
 			break;
 		}
 	}
-	
+	return -1;
 }
