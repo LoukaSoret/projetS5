@@ -62,6 +62,8 @@ int arm_load_store(arm_core p, uint32_t ins) {
     //condition = get_bits(ins,31,28);
     codeOp = get_bits(ins,27,26);
 
+    printf("Rn : %i | Rd : %i\n",Rn,Rd);
+
     /* Condition Test */
     if(1 /*condition(p,ins)*/){
     	/* Load and store for bytes and words */
@@ -258,7 +260,7 @@ int arm_load(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint
 		}	
 		else{
 			Vn = offsetHandling(arm_read_register(p,Rn),immediate,U);				
-			if(!W){ arm_write_register(p,Rn,Vn); }
+			if(W){ arm_write_register(p,Rn,Vn); }
 		}
     }
     else{
@@ -269,7 +271,7 @@ int arm_load(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint
 		}	
 		else{
 			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,shift_codeOp,shift_amount,Rm,0,0),U);				
-			if(!W){ arm_write_register(p,Rn,Vn); }
+			if(W){ arm_write_register(p,Rn,Vn); }
 		}
 	}
 	if(H){
@@ -337,7 +339,7 @@ int arm_store(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uin
 		}	
 		else{
 			Vn = offsetHandling(arm_read_register(p,Rn),immediate,U);				
-			if(!W){ arm_write_register(p,Rn,Vn); }
+			if(W){ arm_write_register(p,Rn,Vn); }
 		}
     }
     else{
@@ -348,7 +350,7 @@ int arm_store(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uin
 		}	
 		else{
 			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,shift_codeOp,shift_amount,Rm,0,0),U);				
-			if(!W){ arm_write_register(p,Rn,Vn); }
+			if(W){ arm_write_register(p,Rn,Vn); }
 		}
 	}
 	if(!P && !W){
