@@ -81,31 +81,35 @@ static int arm_execute_instruction(arm_core p) {
     			break;
     		case 0b010:
     			/* Load/store immediate offset */
+                printf("! In ! \n");
     			arm_load_store(p, instruction);
+                printf("! Out ! \n");
     			break;
     		case 0b011:
     			if (get_bit(instruction,4)){
     				/* Media instructions */
-    				break;
     			}
     			else{
     				/* Load/store register offset */
-    				arm_load_store(p, instruction);
-    				break;
+                    arm_load_store(p, instruction);
     			}
     			break;
     		case 0b100:
     			/* Load/store multiple */
     			arm_load_store_multiple(p, instruction);
+                break;
     		case 0b101:
     			/* Branch and branch with link */
     			arm_branch(p, instruction);
+                break;
     		case 0b110:
     			/* Coprocessor load/store and double register transfers */
     			arm_coprocessor_load_store(p, instruction);
+                break;
     		case 0b111:
     			/* Coprocessor data/registers processing and Software interrupt */
     			arm_coprocessor_others_swi(p, instruction);
+                break;
     		default:
     			break;
     	}
