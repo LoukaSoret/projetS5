@@ -117,8 +117,15 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    		}
 	    	}else{
 	    		printf("On decremente PC\n");
+	    		for(int i=0;i<=15;i++){
+		    		printf("On parcours les registers\n");
+		    		if(get_bit(ins,i)){
+		    			nbreg++;
+		    		}
+		    	}
+		    	adr = arm_read_register(p,get_bits(ins,19,16))-(4*nbreg);
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
-	    			adr-=4;
+	    			adr+=4;
 	    		}
 		    	for(int i=0;i<=15;i++){
 		    		printf("On parcours les registers\n");
@@ -126,8 +133,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 		    			printf("Registre %d est affecté\n",i );
 		    			arm_read_word(p,adr,&value);
 		    			arm_write_register(p,i,value);
-		    			adr-=4;
-		    			nbreg++;
+		    			adr+=4;
 		    		}
 		    	}
 		    	if(W){ // W == 1, on incremente Rn
@@ -152,14 +158,20 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))+(4*nbreg));
 	    		}
 	    	}else{
+	    		for(int i=0;i<=15;i++){
+		    		printf("On parcours les registers\n");
+		    		if(get_bit(ins,i)){
+		    			nbreg++;
+		    		}
+		    	}
+		    	adr = arm_read_register(p,get_bits(ins,19,16))-(4*nbreg);
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
-	    			adr-=4;
+	    			adr+=4;
 	    		}
 		    	for(int i=15;i>=0;i--){
 		    		if(get_bit(ins,i)){
 		    			arm_write_word(p,adr,arm_read_register(p,i));
-		    			adr-=4;
-		    			nbreg++;
+		    			adr+=4;
 		    		}
 		    	}
 		    	if(W){ // W == 1, on incremente Rn
