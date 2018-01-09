@@ -39,18 +39,26 @@ int arm_branch(arm_core p, uint32_t ins) {
         printf("Condition Passé\n");
         int32_t adr = get_bits(ins,23,0);
         int32_t pc = arm_read_register(p,15);
-        adr = adr - pc;
-        adr = get_bits(adr,25,2);
-        if(get_bit(adr,23)){ // Si le bit du poid fort est a 1 alors on extend l'adresse a 30 bits avec des 1
-            adr = 0x30000000 | adr;
+        printf("Valeur de l'adresse initiale : %0x\n",adr );
+        int neg = get_bit(adr,23);
+        if(neg){ // Si le bit du poid fort est a 1 alors on extend l'adresse a 30 bits avec des 1
+            adr = 0x3F000000 | adr;
         }else{
             adr = 0x00000000 | adr;
         }
+        printf("Valeur de l'adresse apres l'extension : %0x \n",adr );
         adr = adr<<2; // On decale de deux bit a gauche pour multiplier la valeur par 4
+        printf("Valeur de l'adresse apres le decalage a gauche de 2 : %0x \n",adr );
+        adr = ~adr;
+        printf("Valeur de complement a 1 : %0x \n",adr );
+        adr = adr + 1;
+        printf("Valeur de complement a 2 : %0x \n",adr );
         int L = get_bit(ins,24); 
         if(L){ // Si L est == 1 alors on sauvegarde la valuer de PC dans R14
             arm_write_register(p,14,pc);
-            arm_write_register(p,15,pc+adr);
+        }
+        if(neg){
+            arm_write_register(p,15,pc-adr);
         }else{
             arm_write_register(p,15,pc+adr);
         }
