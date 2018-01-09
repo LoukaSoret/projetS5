@@ -158,7 +158,7 @@ int condition(arm_core p, uint8_t cond){
 			break;
 		
 		case 14 :
-			return 0;
+			return 1;
 			break;
 			
 		case 15 :
