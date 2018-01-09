@@ -83,23 +83,32 @@ int arm_load_store(arm_core p, uint32_t ins) {
 }
 
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
+	printf("Debut de la fonction Load_Store_Multiple\n");
 	if(condition(p,get_bits(ins,31,28))){
-		uint32_t *adr = NULL;
+		printf("Condition passé\n");
+		uint32_t adr,value;
 		int L = get_bit(ins,20);
 		int U = get_bit(ins,23);
 		int P = get_bit(ins,24);
 		int W = get_bit(ins,21);
 		int nbreg = 0;
 	    if(L){ //Cas du load
-	    	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),adr);
+	    	printf("Debut de l'Initialisation\n");
+	    	printf("Adresse : %0x\n", arm_read_register(p,get_bits(ins,19,16)));
+	    	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),&adr);
+	    	printf("Adresse initialisé\n");
 	    	if(U){ // U == 1 , on remonte les adresses
+	    		printf("On decremente PC \n");
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
-	    			adr--;
+	    			adr -= 4;
 	    		}
-		    	for(uint8_t i=15;i>=0;i--){
+		    	for(int i=15;i>=0;i--){
+		    		printf("On parcours les registers\n");
 		    		if(get_bit(ins,i)){
-		    			arm_write_register(p,i,*adr);
-		    			adr--;
+		    			printf("Registre %d est affecté\n",i );
+		    			arm_read_word(p,adr,&value);
+		    			arm_write_register(p,i,value);
+		    			adr-=4;
 		    			nbreg++;
 		    		}
 		    	}
@@ -107,13 +116,17 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))-(4*nbreg));
 	    		}
 	    	}else{
+	    		printf("On incremente PC\n");
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
-	    			adr++;
+	    			adr+=4;
 	    		}
-		    	for(uint8_t i=15;i>=0;i--){
+		    	for(int i=15;i>=0;i--){
+		    		printf("On parcours les registers\n");
 		    		if(get_bit(ins,i)){
-		    			arm_write_register(p,i,*adr);
-		    			adr++;
+		    			printf("Registre %d est affecté\n",i );
+		    			arm_read_word(p,adr,&value);
+		    			arm_write_register(p,i,value);
+		    			adr+=4;
 		    			nbreg++;
 		    		}
 		    	}
@@ -123,15 +136,15 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    	}
 	    	return 0;
 	    }else{ // Cas du store
-	    	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),adr);
+	    	arm_read_word(p,arm_read_register(p,get_bits(ins,19,16)),&adr);
 	    	if(U){ // U == 1 , on remonte les adresses
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
-	    			adr--;
+	    			adr-=4;
 	    		}
-		    	for(uint8_t i=15;i>=0;i--){
+		    	for(int i=15;i>=0;i--){
 		    		if(get_bit(ins,i)){
-		    			*adr = arm_read_register(p,i);
-		    			adr--;
+		    			arm_write_word(p,adr,arm_read_register(p,i));
+		    			adr-=4;
 		    			nbreg++;
 		    		}
 		    	}
@@ -140,12 +153,12 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    		}
 	    	}else{
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
-	    			adr++;
+	    			adr+=4;
 	    		}
-		    	for(uint8_t i=15;i>=0;i--){
+		    	for(int i=15;i>=0;i--){
 		    		if(get_bit(ins,i)){
-		    			*adr = arm_read_register(p,i);
-		    			adr++;
+		    			arm_write_word(p,adr,arm_read_register(p,i));
+		    			adr+=4;
 		    			nbreg++;
 		    		}
 		    	}
