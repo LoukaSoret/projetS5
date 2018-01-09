@@ -378,8 +378,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
         
     //shift_operands
     //shift(p,shift_codeOp,shift_imm,Rm,0,0)
-    I = get_bit(ins,25);
-    shift_imm = get_bits(ins, 11, 0);
+    I = get_bit(ins,4);
+    shift_imm = get_bits(ins, 11, 7);
     rs = get_bits(ins, 11, 8);
     sh = get_bits(ins,6,5);
     rm = get_bits(ins,3,0);
@@ -460,31 +460,14 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
     int rn, rd, opcode, val_sh, cond, s;
-    uint8_t shift_imm, sh, rm, rs, I;
     
     cond = get_bits(ins, 31, 28);
     opcode = get_bits(ins, 24, 21);
     rn = get_bits(ins, 19, 16);
     rd = get_bits(ins, 15, 12);
-    //value = get_bits(ins, 7, 0);
     s = get_bit(ins, 20);
-    
-    //shift_operands
-    //shift(p,shift_codeOp,shift_imm,Rm,0,0)
-    I = get_bit(ins,25);
-    shift_imm = get_bits(ins, 11, 0);
-    rs = get_bits(ins, 11, 8);
-    sh = get_bits(ins,6,5);
-    rm = get_bits(ins,3,0);
-    
-    printf("IMMEDIATE I %d\n",I);
-    printf("IMMEDIATE shift_imm %d\n", shift_imm);
-    printf("IMMEDIATE rs %d\n",rs);
-    printf("IMMEDIATE sh %d\n",sh);
-    printf("IMMEDIATE rm %d\n",rm);
-    
-    val_sh = shift(p, sh, shift_imm, rm, rs, I);
-     printf("val_sh immediate = %d\n",val_sh);
+
+    val_sh = get_bits(ins, 11, 0);
     
     if(condition(p, cond)){
     	switch(opcode){

@@ -1,6 +1,7 @@
 #include "arm_exception.h"
 #include "arm_constants.h"
 #include "arm_branch_other.h"
+#include "arm_core.h"
 #include "util.h"
 #include "debug.h"
 #include "decodeur_cond_shift.h"
@@ -103,7 +104,6 @@ int condition(arm_core p, uint8_t cond){
 				return 0;
 			}
 			break;
-
 		case 8 :
 			if(read_C(p) && !read_Z(p)){
 				return 1;
@@ -158,7 +158,7 @@ int condition(arm_core p, uint8_t cond){
 			break;
 		
 		case 14 :
-			return 0;
+			return 1;
 			break;
 			
 		case 15 :
@@ -173,6 +173,14 @@ int condition(arm_core p, uint8_t cond){
 	return 0;
 }
 
+/*************************************************************************
+Auteur : Kirill (+Louka modifications)
+Date : 28/12/2017
+Spec : Prends en argument le code op shift la valeur immediate shift_imm
+le registre d'offset Rm re registre de shift Rs et le bit I qui determine
+si le shift est execute avec shift_imm (0) ou avec Rs (1). Renvois la
+valeur de Rm shiftee.
+**************************************************************************/
 int shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uint8_t I)
 {
 	int32_t Rm_value = arm_read_register(p,Rm);
@@ -203,7 +211,7 @@ int shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uin
 			break;
 
 			default:
-				return 0;
+				return Rm_value;
 			break;
 		}
 	// mem[Rm] shift imm_shift
@@ -230,10 +238,9 @@ int shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uin
 			break;
 
 			default:
-				return 0;
+				return Rm_value;
 			break;
 		}
 	}
-	return 0;
+	return -1;
 }
-
