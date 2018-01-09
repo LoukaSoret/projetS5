@@ -331,9 +331,11 @@ void mov_processing(arm_core p,uint8_t rd,int val_sh,  int s){
 	
 	//Rd := shifter_operand (no first operand)
 	uint32_t resultat;
-	
+	printf("val_sh mov processing = %d\n", val_sh);
 	        arm_write_usr_register(p,rd, val_sh);
 	        resultat=arm_read_usr_register(p,rd);
+	        
+	        printf("result = %d\n",resultat);
 
 	        //si le registre destination est en mode user
 	        if(resultat && s==1){
@@ -342,7 +344,7 @@ void mov_processing(arm_core p,uint8_t rd,int val_sh,  int s){
     
              //The V flag and the rest of the CPSR are unaffected.
 	} 
-	
+
 }
 
 void bic_processing(arm_core p,uint8_t rn,uint8_t rd, int val_sh,  int s){
@@ -365,8 +367,8 @@ void bic_processing(arm_core p,uint8_t rn,uint8_t rd, int val_sh,  int s){
 
 /* Decoding functions for different classes of instructions */
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
-   int cond, rn, rd, opcode, val_sh;
-   int s, rm;
+   int cond, rn, rd, opcode, val_sh, s;
+   uint8_t sh, rm, shift_imm, rs, I;
     
     cond = get_bits(ins, 31, 28);
     opcode = get_bits(ins, 24, 21);
@@ -376,10 +378,20 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
         
     //shift_operands
     //shift(p,shift_codeOp,shift_imm,Rm,0,0)
-    s = get_bits(ins,6,5);
+    I = get_bit(ins,4);
+    shift_imm = get_bits(ins, 11, 7);
+    rs = get_bits(ins, 11, 8);
+    sh = get_bits(ins,6,5);
     rm = get_bits(ins,3,0);
     
-    val_sh = shift(p, s, 0, rm, 0, 1);
+     printf("SHIFT I %d\n",I);
+    printf("SHIFT shift_imm %d\n", shift_imm);
+    printf("SHIFT rs %d\n",rs);
+    printf("SHIFT sh %d\n",sh);
+    printf("SHIFT rm %d\n",rm);
+    
+    val_sh = shift(p, sh, shift_imm, rm, rs, I);
+    printf("val_sh shift = %d\n",val_sh);
     
     if(condition(p, cond)){
     	switch(opcode){
@@ -447,25 +459,15 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 }
 
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
-    int rn, rd, opcode, val_sh, cond;
-    int shift_imm, s, rm;
+    int rn, rd, opcode, val_sh, cond, s;
     
     cond = get_bits(ins, 31, 28);
     opcode = get_bits(ins, 24, 21);
     rn = get_bits(ins, 19, 16);
     rd = get_bits(ins, 15, 12);
-    //rotation = get_bits(ins, 11, 8);
-    //value = get_bits(ins, 7, 0);
     s = get_bit(ins, 20);
-    
-    //shift_operands
-    //shift(p,shift_codeOp,shift_imm,Rm,0,0)
-    shift_imm = get_bits(ins, 11, 0);
-    s = get_bits(ins,6,5);
-    rm = get_bits(ins,3,0);
-    
-    
-    val_sh = shift(p, s, shift_imm, rm, 0, 0);
+
+    val_sh = get_bits(ins, 11, 0);
     
     if(condition(p, cond)){
     	switch(opcode){
