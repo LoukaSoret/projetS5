@@ -205,7 +205,7 @@ int arm_load_store_half_double(arm_core p,uint32_t ins)
     Rd = get_bits(ins,15,12); // content to be loaded or stored
     P = get_bit(ins,24); //post-indexed addressing(0) or pre-indexed addressing(1)
     U = get_bit(ins,23); // +offset (1) or -offset(0)
-    I = get_bit(ins,22); // immediate (1) or register (0) offset
+    I = ! get_bit(ins,22); // immediate (1) or register (0) offset
     W = get_bit(ins,21); // P=0 : MUST be 1 | P=0 Rn written back (1) or unchanged (0)
     L = get_bit(ins,20); // Load (1) or Store (0)
     S = get_bit(ins,6);
@@ -282,6 +282,7 @@ int arm_load(arm_core p,uint8_t Rn,uint8_t Rd,uint8_t I,uint8_t P,uint8_t U,uint
 			else { arm_write_usr_register(p,Rn,offsetHandling(Vn,shift(p,shift_codeOp,shift_amount,Rm,0,0),U)); }
 		}	
 		else{
+			printf("SHAD NO !\n");
 			Vn = offsetHandling(arm_read_register(p, Rn),shift(p,shift_codeOp,shift_amount,Rm,0,0),U);				
 			if(W){ arm_write_register(p,Rn,Vn); }
 		}
