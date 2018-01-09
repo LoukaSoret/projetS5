@@ -23,7 +23,6 @@ Contact: Guillaume.Huard@imag.fr
 #include "arm_load_store.h"
 #include "arm_exception.h"
 #include "arm_constants.h"
-#include "decodeur_cond_shift.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "memory.h"
