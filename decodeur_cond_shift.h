@@ -19,6 +19,6 @@ le registre d'offset Rm re registre de shift Rs et le bit I qui determine
 si le shift est execute avec shift_imm (0) ou avec Rs (1). Renvois la
 valeur de Rm shiftee.
 **************************************************************************/
-int shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uint8_t I);
+uint32_t shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uint8_t I);
 
 #endif
