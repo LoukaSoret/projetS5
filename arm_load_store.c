@@ -101,20 +101,14 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 		int W = get_bit(ins,21);
 		int nbreg = 0;
 	    if(L){ //Cas du load
-	    	printf("Debut de l'Initialisation\n");
 	    	adr = arm_read_register(p,get_bits(ins,19,16));
-	    	printf("Adresse initialisé : %0x\n",adr);
 	    	if(U){ // U == 1 , on remonte les adresses
-	    		printf("On Incremente PC \n");
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
 	    			adr += 4;
 	    		}
 		    	for(int i=0;i<=15;i++){
-		    		printf("On parcours les registers\n");
 		    		if(get_bit(ins,i)){
-		    			printf("Registre %d est affecté\n",i );
 		    			arm_read_word(p,adr,&value);
-		    			printf("Valeur lu : %0x Pour l'adresse : %0x\n",value,adr );
 		    			arm_write_register(p,i,value);
 		    			adr+=4;
 		    			nbreg++;
@@ -124,7 +118,6 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    			arm_write_register(p,get_bits(ins,19,16),arm_read_register(p,get_bits(ins,19,16))+(4*nbreg));
 	    		}
 	    	}else{
-	    		printf("On decremente PC\n");
 	    		for(int i=0;i<=15;i++){
 		    		if(get_bit(ins,i)){
 		    			nbreg++;
@@ -135,11 +128,8 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    			adr+=4;
 	    		}
 		    	for(int i=0;i<=15;i++){
-		    		printf("On parcours les registers\n");
 		    		if(get_bit(ins,i)){
-		    			printf("Registre %d est affecté\n",i );
 		    			arm_read_word(p,adr,&value);
-		    			printf("Valeur lu : %0x Pour l'adresse : %0x\n",value,adr );
 		    			arm_write_register(p,i,value);
 		    			adr+=4;
 		    		}
@@ -167,7 +157,6 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    		}
 	    	}else{
 	    		for(int i=0;i<=15;i++){
-		    		printf("On parcours les registers\n");
 		    		if(get_bit(ins,i)){
 		    			nbreg++;
 		    		}
