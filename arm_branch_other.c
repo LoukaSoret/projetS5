@@ -27,10 +27,11 @@ Contact: Guillaume.Huard@imag.fr
 #include <debug.h>
 #include <stdlib.h>
 
-/*AUTHOR : Nikolnikov Kirill
-DATE : 21/12/2017
-Spécifications : Fonction B/BL effectue un branchement vers l'adresse spécifié dans l'instruction ins
-Avec la sauvegarde du PC is le bit L est a 1*/
+/*************************************************************
+Auteur : Kirill
+Spec: Prends en entree le coeur arm p et l'instruction ins.
+Effectue un branchement avec ou sans la sauvegarde du PC
+*************************************************************/
 
 
 int arm_branch(arm_core p, uint32_t ins) {
