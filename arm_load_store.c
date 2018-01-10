@@ -82,6 +82,14 @@ int arm_load_store(arm_core p, uint32_t ins) {
     return -1;
 }
 
+/*************************************************************************
+Auteur : Kirill
+Date : 22/12/17
+Spec: Prend en entrée p : arm_core ; ins : codage de l'instruction
+lu sur 32bits. Dans le cas du load, les registres sont affecté
+avec les valeurs lu dans une plage de mémoire. Dans le cas d'un store
+Une plage de mémoire est affecté par les valeurs stocké dans les registres.
+**************************************************************************/
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	printf("Debut de la fonction Load_Store_Multiple\n");
 	if(condition(p,get_bits(ins,31,28))){
