@@ -155,7 +155,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
 	    			adr+=4;
 	    		}
-		    	for(int i=15;i>=0;i--){
+		    	for(int i=0;i<=15;i++){
 		    		if(get_bit(ins,i)){
 		    			arm_write_word(p,adr,arm_read_register(p,i));
 		    			adr+=4;
@@ -176,7 +176,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
 	    			adr+=4;
 	    		}
-		    	for(int i=15;i>=0;i--){
+		    	for(int i=0;i<=15;i++){
 		    		if(get_bit(ins,i)){
 		    			arm_write_word(p,adr,arm_read_register(p,i));
 		    			adr+=4;
