@@ -363,9 +363,17 @@ void bic_processing(arm_core p,uint8_t rn,uint8_t rd, uint32_t val_sh,  int s){
 	
 }
 
-/*****************************************************/
 
-/* Decoding functions for different classes of instructions */
+/*************************************************************************
+Auteur : Bianca
+Date : 19/12/2017
+Spec : Prends en argument l'instruction en 32 bits. Cette fonction traite 
+	les instructions sans les valeurs immediate, donc avec que les registres.
+	La fonction decoupe l'instruction et appelle les fonctions necessaire 
+	par rapport a son op code. Les fonctions sont appellées que si la 
+	condition est satisfiée.
+**************************************************************************/
+
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
    int cond, rn, rd, opcode, s;
    uint8_t sh, rm, shift_imm, rs, I;
@@ -376,9 +384,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
     s = get_bit(ins, 20);
     rn = get_bits(ins, 19, 16);
     rd = get_bits(ins, 15, 12);
-        
-    //shift_operands
-    //shift(p,shift_codeOp,shift_imm,Rm,0,0)
+
     I = get_bit(ins,4);
     shift_imm = get_bits(ins, 11, 7);
     rs = get_bits(ins, 11, 8);
@@ -458,6 +464,15 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
    }
    return 0;
 }
+
+/*************************************************************************
+Auteur : Bianca
+Date : 19/12/2017
+Spec : Prends en argument l'instruction en 32 bits. Cette fonction traite 
+	les instructions avec les valeurs immediate. La fonction decoupe 
+	l'instruction et appelle les fonctions necessaire par rapport a son op 
+	code. Les fonctions sont appellées que si la condition est satisfiée.
+**************************************************************************/
 
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
     int rn, rd, opcode, cond, s;

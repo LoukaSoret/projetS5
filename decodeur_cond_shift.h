@@ -2,11 +2,23 @@
 #define __DECODEUR_COND_SHIFT_H__
 #include <stdint.h>
 #include "arm_core.h"
-//
+
+/*************************************************************************
+Auteur : Bianca
+Date : 20/12/2017
+Spec : Les fonctions renvoient les valeurs de N, Z, C et V respectivement.
+**************************************************************************/
 int read_N(arm_core p);
 int read_Z(arm_core p);
 int read_C(arm_core p);
 int read_V(arm_core p);
+
+/*************************************************************************
+Auteur : Bianca
+Date : 20/12/2017
+Spec : Prends en argument le condition. Si la condition est satisfiée, la 
+	fonction renvoie vrai, sinon faux. 
+**************************************************************************/
 int condition(arm_core p, uint8_t cond);
 
 

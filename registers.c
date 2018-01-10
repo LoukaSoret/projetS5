@@ -4,17 +4,14 @@ Copyright (C) 2011 Guillaume Huard
 Ce programme est libre, vous pouvez le redistribuer et/ou le modifier selon les
 termes de la Licence Publique Générale GNU publiée par la Free Software
 Foundation (version 2 ou bien toute autre version ultérieure choisie par vous).
-
 Ce programme est distribué car potentiellement utile, mais SANS AUCUNE
 GARANTIE, ni explicite ni implicite, y compris les garanties de
 commercialisation ou d'adaptation dans un but spécifique. Reportez-vous à la
 Licence Publique Générale GNU pour plus de détails.
-
 Vous devez avoir reçu une copie de la Licence Publique Générale GNU en même
 temps que ce programme ; si ce n'est pas le cas, écrivez à la Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
 États-Unis.
-
 Contact: Guillaume.Huard@imag.fr
 	 Bâtiment IMAG
 	 700 avenue centrale, domaine universitaire
@@ -36,11 +33,16 @@ struct registers_data {
 				10111 Abort (ABT 0x17)
 				11011 Undefined (UND 0x1b)
 				11111 System (SYS 0x1f)
-
 	Privileged modes: tous sauf User
 	SPSR: tous sauf User et System*/
 	uint8_t mode;
 };
+
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Creer des registres vide.
+**************************************************************************/
 
 registers registers_create() {
 	registers r = malloc(sizeof(struct registers_data));
@@ -48,16 +50,33 @@ registers registers_create() {
 	return r;
 }
 
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Detruit les registres
+**************************************************************************/
+
 void registers_destroy(registers r) {
  	free(r->reg_no);
  	r->mode=0;
  	free(r);
 }
 
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Revoie le mode.
+**************************************************************************/
+
 uint8_t get_mode(registers r) {
 	return r->mode;
 }
 
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Revoie vrai si le mode a l'access à le spsr. Revoie faux sinon.
+**************************************************************************/
 int current_mode_has_spsr(registers r) {
 	if (r->mode == 16 || r->mode == 31){
 		return 0;
@@ -66,6 +85,12 @@ int current_mode_has_spsr(registers r) {
 		return 1;
 	}
 }
+
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Revoie vrai si le mode est priviligé. Revoie faux sinon.
+**************************************************************************/
 
 int in_a_privileged_mode(registers r) {
 	if (r->mode == 16){
@@ -156,6 +181,12 @@ uint32_t read_usr_register(registers r, uint8_t reg) {
 	}
 	return 1;
 }
+
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Revoie la valeur dans le cpsr.
+**************************************************************************/
 
 uint32_t read_cpsr(registers r) {
 	return r->reg_no[CPSR_REG];
@@ -261,6 +292,11 @@ void write_usr_register(registers r, uint8_t reg, uint32_t value) {
 	}
 }
 
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Prends en argument une valeur. Ecrit le valeur dans le cpsr
+**************************************************************************/
 void write_cpsr(registers r, uint32_t value) {
 	r->reg_no[CPSR_REG] = value;
 }
