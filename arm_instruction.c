@@ -81,9 +81,7 @@ static int arm_execute_instruction(arm_core p) {
     			break;
     		case 0b010:
     			/* Load/store immediate offset */
-                printf("! In ! \n");
     			arm_load_store(p, instruction);
-                printf("! Out ! \n");
     			break;
     		case 0b011:
     			if (get_bit(instruction,4)){
