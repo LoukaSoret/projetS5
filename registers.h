@@ -24,6 +24,35 @@ Contact: Guillaume.Huard@imag.fr
 #define __REGISTERS_H__
 #include <stdint.h>
 
+#define FIQ_OFFSET 5
+
+// SP index
+#define USR_SYS_SP 18
+#define SVC_SP 19
+#define ABT_SP 20
+#define FIQ_SP 21
+#define IRQ_SP 22
+#define UND_SP 23
+// LR index
+#define USR_SYS_LR 24
+#define SVC_LR 25
+#define ABT_LR 26
+#define FIQ_LR 27
+#define IRQ_LR 28
+#define UND_LR 29
+
+// SPSR index
+#define SVC_SPSR 31
+#define ABT_SPSR 32
+#define FIQ_SPSR 33
+#define IRQ_SPSR 34
+#define UND_SPSR 35
+
+#define PC 30
+#define CPSR_REG 31 
+
+
+
 typedef struct registers_data *registers;
 
 registers registers_create();
