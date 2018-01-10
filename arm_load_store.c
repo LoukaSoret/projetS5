@@ -126,7 +126,6 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    	}else{
 	    		printf("On decremente PC\n");
 	    		for(int i=0;i<=15;i++){
-		    		printf("On parcours les registers\n");
 		    		if(get_bit(ins,i)){
 		    			nbreg++;
 		    		}
@@ -140,6 +139,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 		    		if(get_bit(ins,i)){
 		    			printf("Registre %d est affecté\n",i );
 		    			arm_read_word(p,adr,&value);
+		    			printf("Valeur lu : %0x Pour l'adresse : %0x\n",value,adr );
 		    			arm_write_register(p,i,value);
 		    			adr+=4;
 		    		}
