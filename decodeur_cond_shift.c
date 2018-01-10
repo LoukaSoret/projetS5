@@ -5,7 +5,13 @@
 #include "util.h"
 #include "debug.h"
 #include "decodeur_cond_shift.h"
-//
+
+/*************************************************************************
+Auteur : Bianca
+Date : 20/12/2017
+Spec : Les fonctions renvoient les valeurs de N, Z, C et V respectivement.
+**************************************************************************/
+
 int read_N(arm_core p){
 	uint32_t cprs = arm_read_cpsr(p);
 	
@@ -29,6 +35,14 @@ int read_V(arm_core p){
 	
 	return get_bit(cprs, 28);
 }
+
+
+/*************************************************************************
+Auteur : Bianca
+Date : 20/12/2017
+Spec : Prends en argument le condition. Si la condition est satisfiée, la 
+	fonction renvoie vrai, sinon faux. 
+**************************************************************************/
 
 int condition(arm_core p, uint8_t cond){
 	
