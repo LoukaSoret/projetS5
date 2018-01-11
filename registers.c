@@ -42,6 +42,11 @@ Auteur : Bianca
 Date : 18/12/2017
 Spec : Creer des registres vide.
 **************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 
 registers registers_create() {
 	registers r = malloc(sizeof(struct registers_data));
@@ -52,6 +57,11 @@ registers registers_create() {
 Auteur : Bianca
 Date : 18/12/2017
 Spec : Detruit les registres
+**************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
 **************************************************************************/
 
 void registers_destroy(registers r) {
@@ -64,9 +74,14 @@ Auteur : Bianca
 Date : 18/12/2017
 Spec : Revoie le mode.
 **************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 
 uint8_t get_mode(registers r) {
-	return r->reg_no[CPSR] & (-1 << 5);
+	return r->reg_no[CPSR_REG] & (-1 << 5);
 }
 
 /*************************************************************************
@@ -88,6 +103,11 @@ Auteur : Bianca
 Date : 18/12/2017
 Spec : Revoie vrai si le mode est priviligé. Revoie faux sinon.
 **************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 
 int in_a_privileged_mode(registers r) {
 	if (get_mode(r) == 16){
@@ -98,6 +118,17 @@ int in_a_privileged_mode(registers r) {
 	}
 }
 
+
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Renvois la valeur du registre dans le mode courant
+**************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 uint32_t read_register(registers r, uint8_t reg) {
 	uint8_t current_mode = get_mode(r);
 	if (reg>=0 && reg<=7){
@@ -160,6 +191,17 @@ uint32_t read_register(registers r, uint8_t reg) {
 	return 1;
 }
 
+
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Renvois la valeur du registre du mode USR
+**************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 uint32_t read_usr_register(registers r, uint8_t reg) {
     if(reg >= 0 && reg <= 12){
 		return r->reg_no[reg];
@@ -184,11 +226,26 @@ Auteur : Bianca
 Date : 18/12/2017
 Spec : Revoie la valeur dans le cpsr.
 **************************************************************************/
-
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 uint32_t read_cpsr(registers r) {
 	return r->reg_no[CPSR_REG];
 }
 
+
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Renvois la valeur du spsr dans le mode courant
+**************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 uint32_t read_spsr(registers r) {
 	uint8_t current_mode = get_mode(r);
 	switch(current_mode){
@@ -209,6 +266,19 @@ uint32_t read_spsr(registers r) {
 			return -1;
 	}
 }
+
+
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Prends en argument une valeur. Ecrit le valeur dans les registres
+en fonction du mode.
+**************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 
 void write_register(registers r, uint8_t reg, uint32_t value) {
 	uint8_t current_mode = get_mode(r);
@@ -271,6 +341,19 @@ void write_register(registers r, uint8_t reg, uint32_t value) {
 	}
 }
 
+
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Prends en argument une valeur.
+Ecrit le valeur dans les registres USR.
+**************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
+
 void write_usr_register(registers r, uint8_t reg, uint32_t value) {
 	if(reg >= 0 && reg <= 12){
 		r->reg_no[reg] = value;
@@ -294,10 +377,26 @@ Auteur : Bianca
 Date : 18/12/2017
 Spec : Prends en argument une valeur. Ecrit le valeur dans le cpsr
 **************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 void write_cpsr(registers r, uint32_t value) {
 	r->reg_no[CPSR_REG] = value;
 }
 
+
+/*************************************************************************
+Auteur : Bianca
+Date : 18/12/2017
+Spec : Prends en argument une valeur. Ecrit le valeur dans le spsr
+**************************************************************************/
+/*************************************************************************
+Auteur : Louka
+Date : 10/01/2018
+Modif : Gestion des modes avec 37 registres au lieux de 18
+**************************************************************************/
 void write_spsr(registers r, uint32_t value) {
 	uint8_t current_mode = get_mode(r);
 	switch(current_mode){
