@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -ne 1 ];
+if [ $# -ne 1 ]
 then
 	echo "[Erreur] aucun argument."
 else
@@ -8,11 +8,12 @@ else
 	baseFilename=$(basename $filename)
 	# Recupere le numero de la derniere ligne : swi 0x123456
 	lastLine=$(grep -n 'swi 0x123456' 'Examples/'$baseFilename'.s' | awk -F ":" '{print $1}')	
-	if [ -f "arm_simulator" ];
+	if [ -f "arm_simulator" ]
 	then
 		> log_sim.out
 		./arm_simulator --gdb-port 44000 &
-		arm-none-eabi-gdb -ex "file $1" \
+		arm-none-eabi-gdb -ex "set pagination off" \
+		-ex "file $1" \
 		-ex "target remote localhost:44000" \
 		-ex "load" \
 		-ex "b $lastLine" \
@@ -21,18 +22,22 @@ else
 		-ex "set logging on" \
 		-ex "inf reg" \
 		-ex "set logging off" \
+		-ex "continue" \
 		-ex "quit"
 
 		> log_gdb.out
-		arm-none-eabi-gdb -ex "file $1" \
+		arm-none-eabi-gdb -ex "set pagination off" \
+		-ex "file $1" \
 		-ex "target sim" \
 		-ex "load" \
-		-ex "b $lastLine" \
+		-ex "b 1" \
 		-ex "run" \
+		-ex "advance $lastLine" \
 		-ex "set logging file log_gdb.out" \
 		-ex "set logging on" \
 		-ex "inf reg" \
 		-ex "set logging off" \
+		-ex "continue" \
 		-ex "quit"
 
 		echo "$(diff log_sim.out log_gdb.out)"
