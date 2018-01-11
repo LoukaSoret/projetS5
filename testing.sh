@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Auteur: Louka Soret
+#Date: 11/01/2018
+
 if [ $# -ne 1 ]
 then
 	echo "[Erreur] aucun argument."
