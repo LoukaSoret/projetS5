@@ -30,7 +30,7 @@ Contact: Guillaume.Huard@imag.fr
 /*************************************************************
 Auteur : Kirill
 Spec: Prends en entree le coeur arm p et l'instruction ins.
-Effectue un branchement avec ou sans la sauvegarde du PC
+Effectue un branchement avec ou sans la sauvegarde du PC.
 *************************************************************/
 
 
