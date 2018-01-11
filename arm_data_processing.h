@@ -66,6 +66,13 @@ Date : 19/12/2017
 Spec : La fonction fait le mis a jour des flags Z et N par rapport au 
 	resultat donne en argument.  
 **************************************************************************/
+
+/*************************************************************************
+Auteur : Bianca 
+Date : 11/01/2017
+Spec : La fonction fait le mis a jour des flags Z et N par rapport au 
+	resultat donne en argument.  
+**************************************************************************/
 void maj_ZNCV(arm_core p,uint32_t value);
 
 /*************************************************************************
