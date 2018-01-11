@@ -39,27 +39,24 @@ struct registers_data {
 
 	Privileged modes: tous sauf User
 	SPSR: tous sauf User et System*/
-	uint8_t mode;
 };
 
 registers registers_create() {
 	registers r = malloc(sizeof(struct registers_data));
-	r->mode = USR;
 	return r;
 }
 
 void registers_destroy(registers r) {
  	free(r->reg_no);
- 	r->mode=0;
  	free(r);
 }
 
 uint8_t get_mode(registers r) {
-	return r->mode;
+	return r->reg_no[CPSR] & (-1 << 5);
 }
 
 int current_mode_has_spsr(registers r) {
-	if (r->mode == 16 || r->mode == 31){
+	if (get_mode(r) == 16 || get_mode(r) == 31){
 		return 0;
 	}
 	else{
@@ -68,7 +65,7 @@ int current_mode_has_spsr(registers r) {
 }
 
 int in_a_privileged_mode(registers r) {
-	if (r->mode == 16){
+	if (get_mode(r) == 16){
 		return 0;
 	}
 	else{
