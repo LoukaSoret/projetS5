@@ -25,6 +25,24 @@ Contact: Guillaume.Huard@imag.fr
 #include <stdint.h>
 #include "arm_core.h"
 
+/*************************************************************************
+Auteur : Amadou 
+Date : 19/12/2017
+Spec : Les fonctions prennent en argument les registres (soit rn, soit rd, 
+	soit les deux), la valeur pre-traite par shift, et le bit s dans les cas 
+	ou les fonctions peuvent modifier les cpsr. Les fonctions effecutent les 
+	instructions de ARM.  
+**************************************************************************/
+
+/*************************************************************************
+Auteur : Bianca 
+Date : 08/01/2018
+Spec : Les fonctions prennent en argument les registres (soit rn, soit rd, 
+	soit les deux), la valeur pre-traite par shift, et le bit s dans les cas 
+	ou les fonctions peuvent modifier les cpsr. Les fonctions effecutent les 
+	instructions de ARM.  
+**************************************************************************/
+
 void and_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh, int s);
 void sub_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh, int s);
 void add_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh, int s);
@@ -41,6 +59,13 @@ void tst_processing(arm_core p,uint8_t rn,uint32_t val_sh);
 void teq_processing(arm_core p,uint8_t rn,uint32_t val_sh);
 void cmp_processing(arm_core p,uint8_t rn,uint32_t val_sh);
 void cmn_processing(arm_core p,uint8_t rn,uint32_t val_sh);
+
+/*************************************************************************
+Auteur : Amadou 
+Date : 19/12/2017
+Spec : La fonction fait le mis a jour des flags Z et N par rapport au 
+	resultat donne en argument.  
+**************************************************************************/
 void maj_ZNCV(arm_core p,uint32_t value);
 
 /*************************************************************************

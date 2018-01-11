@@ -25,6 +25,12 @@ Contact: Guillaume.Huard@imag.fr
 #include "debug.h"
 #include "decodeur_cond_shift.h"
 
+/*************************************************************************
+Auteur : Amadou 
+Date : 19/12/2017
+Spec : La fonction fait le mis a jour des flags Z et N par rapport au 
+	resultat donne en argument.  
+**************************************************************************/
 void maj_ZN(arm_core p,uint32_t resultat){
 
 	//indicateur Z
@@ -44,15 +50,33 @@ void maj_ZN(arm_core p,uint32_t resultat){
 }
 
 
+/*************************************************************************
+Auteur : Amadou 
+Date : 19/12/2017
+Spec : Les fonctions prennent en argument les registres (soit rn, soit rd, 
+	soit les deux), la valeur pre-traite par shift, et le bit s dans les cas 
+	ou les fonctions peuvent modifier les cpsr. Les fonctions effecutent les 
+	instructions de ARM.  
+**************************************************************************/
+
+/*************************************************************************
+Auteur : Bianca 
+Date : 08/01/2018
+Spec : Les fonctions prennent en argument les registres (soit rn, soit rd, 
+	soit les deux), la valeur pre-traite par shift, et le bit s dans les cas 
+	ou les fonctions peuvent modifier les cpsr. Les fonctions effecutent les 
+	instructions de ARM.  
+**************************************************************************/
+
 void mvn_processing(arm_core p,uint8_t rd, uint32_t val_sh,  int s){
 
 	//Move Not Rd := NOT shifter_operand (no first operand)
 
-	arm_write_usr_register(p,rd, (~val_sh));
-	uint32_t resultat=arm_read_usr_register(p,rd);
+	arm_write_register(p,rd, (~val_sh));
+	uint32_t resultat=arm_read_register(p,rd);
 
 	//si le registre destination est en mode user
-	        if(resultat && s==1){
+	        if(s){
 	        	maj_ZN(p,resultat);
     
              //The V flag and the rest of the CPSR are unaffected.
@@ -69,19 +93,11 @@ void tst_processing(arm_core p,uint8_t rn,uint32_t val_sh){
 	//Update flags after Rn AND shifter_operand
 	uint32_t resultat,operande_1;
 	
-	operande_1=arm_read_usr_register(p,rn);
+	operande_1=arm_read_register(p,rn);
     resultat=operande_1 & val_sh;
 	
 
 	maj_ZN(p,resultat);
-
-	//indicateur V
-	if(operande_1 !=0 && (resultat/operande_1) != val_sh){
-
-		arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<28)));
-	}
-	else
-        arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));
 
     // dans un AND C=0;
 	arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<29))));
@@ -94,7 +110,7 @@ void teq_processing(arm_core p,uint8_t rn,uint32_t val_sh){
 
 	uint32_t resultat,operande_1;
 
-	operande_1=arm_read_usr_register(p,rn);
+	operande_1=arm_read_register(p,rn);
 
 	resultat=operande_1 ^ val_sh;
 
@@ -114,9 +130,9 @@ void cmp_processing(arm_core p,uint8_t rn,uint32_t val_sh){
 
 	//Update flags after Rn - shifter_operand
 	
-
+	int c = read_C(p);
 	uint32_t resultat,operande_1;
-	operande_1=arm_read_usr_register(p,rn);
+	operande_1=arm_read_register(p,rn);
 
 	resultat=operande_1 - val_sh;
 	
@@ -134,10 +150,19 @@ void cmp_processing(arm_core p,uint8_t rn,uint32_t val_sh){
 
     // Indicateur C;
     
-    if(operande_1!=resultat+val_sh)
+   /* if(operande_1!=resultat+val_sh)
     	arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<29)));
       else
-      	arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));
+      	arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));*/
+      	
+      if( (0xffffffff - operande_1) < ~val_sh + 0x1 && !c){
+    	printf("C updated\n");
+    	arm_write_cpsr(p, set_bit(arm_read_cpsr(p), 29));
+    	}
+    if( (0xffffffff - operande_1) >= ~val_sh + 0x1 && c) {
+    	printf("C updated\n");
+    	arm_write_cpsr(p, clr_bit(arm_read_cpsr(p), 29));
+    }
 }
 
 void cmn_processing(arm_core p,uint8_t rn,uint32_t val_sh){
@@ -145,10 +170,9 @@ void cmn_processing(arm_core p,uint8_t rn,uint32_t val_sh){
 	//Update flags after Rn + shifter_operand
 
 	uint32_t resultat,operande_1;
+	int c = read_C(p);
 
-	operande_1=arm_read_usr_register(p,rn);
-
-	resultat=operande_1 + val_sh;
+	operande_1=arm_read_register(p,rn);
 	
     maj_ZN(p,resultat);
 
@@ -162,10 +186,14 @@ void cmn_processing(arm_core p,uint8_t rn,uint32_t val_sh){
 
     // Indicateur C
     
-    if(operande_1!=resultat-val_sh)
-    	arm_write_cpsr(p, (arm_read_cpsr(p) | (1<<29)));
-      else
-arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));
+    if( (0xffffffff - operande_1) < val_sh && !c){
+    	printf("C updated\n");
+    	arm_write_cpsr(p, set_bit(arm_read_cpsr(p), 29));
+    	}
+    if( (0xffffffff - operande_1) >= val_sh && c) {
+    	printf("C updated\n");
+    	arm_write_cpsr(p, clr_bit(arm_read_cpsr(p), 29));
+    }
 	
 }
 
@@ -174,10 +202,10 @@ void and_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh, int s){
   //Rd := Rn AND shifter_operand
 	uint32_t resultat;
 	
-	resultat= arm_read_usr_register(p,rn) & val_sh;
-           arm_write_usr_register(p,rd, resultat);
+	resultat= arm_read_register(p,rn) & val_sh;
+           arm_write_register(p,rd, resultat);
 
-           if(s==1){
+           if(s){
            	  tst_processing(p,rn,val_sh);
            }
 
@@ -187,23 +215,39 @@ void sub_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
     
     //Rd := Rn - shifter_operand
     uint32_t resultat;
-    resultat= arm_read_usr_register(p,rn) - val_sh;
-           arm_write_usr_register(p,rd, resultat);
-           if(resultat && s==1){
+    int c = read_C(p);
+    
+     printf("C before sub = %d\n",c); 
+    
+    resultat= arm_read_register(p,rn) - val_sh;
+   
+           arm_write_register(p,rd, resultat);
+           if(s){
            	 cmp_processing(p,rn,val_sh);
 	}
+	
+	c = read_C(p);
+	printf("C after sub = %d\n",c); 
 }
 
 void add_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 	
 	//Rd := Rn + shifter_operand
 	uint32_t resultat;
- 
-    resultat= arm_read_usr_register(p,rn) + val_sh;
-           arm_write_usr_register(p,rd, resultat);
-           if(resultat && s==1){
+	int c = read_C(p);;
+ 	printf("C before add = %d\n",c);
+ 	
+ 	printf("bit S = %d\n",s);
+    resultat= arm_read_register(p,rn) + val_sh;
+           arm_write_register(p,rd, resultat);
+           
+           printf("Result of add = %d\n",resultat);
+           if(s){
+           printf("IF ENTERED\n");
            	cmn_processing(p,rn,val_sh);
            }
+       c = read_C(p);
+       printf("C after add = %d\n",c);
 
 }
 
@@ -213,9 +257,9 @@ void eor_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 
 	uint32_t resultat;
 
-   resultat= arm_read_usr_register(p,rn) ^ val_sh;
-           arm_write_usr_register(p,rd, resultat);
-           if(resultat && s==1){
+   resultat= arm_read_register(p,rn) ^ val_sh;
+           arm_write_register(p,rd, resultat);
+           if(s){
            	teq_processing(p,rn,val_sh);
 
 			}
@@ -227,12 +271,14 @@ void rsb_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 	//Rd := shifter_operand - Rn
 
    uint32_t resultat,valrn;
-
-   valrn=arm_read_usr_register(p,rn);
+   int c = read_C(p);
+	
+	printf("C before RSB processing = %d\n",c);
+   valrn=arm_read_register(p,rn);
    resultat= val_sh - valrn;
-           arm_write_usr_register(p,rd, resultat);
+           arm_write_register(p,rd, resultat);
            
-           if(resultat && s==1){
+           if(s){
            	   
            	   //mis a jour Z et N
            	   maj_ZN(p,resultat);
@@ -253,16 +299,22 @@ void rsb_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
                                arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));
            	 
 					}
+					
+		c = read_C(p);
+		printf("C after RSB processing = %d\n",c);
 }
 
 void adc_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 
 	//Rd := Rn + shifter_operand + Carry Flag
 	uint32_t resultat;
+	int c = read_C(p);
+	
+	printf("C = %d\n",c);
 
-	resultat= arm_read_usr_register(p,rn) + val_sh + get_bit(arm_read_cpsr(p),29);
-            arm_write_usr_register(p,rd, resultat);
-            if(resultat && s==1){
+	resultat= arm_read_register(p,rn) + val_sh + get_bit(arm_read_cpsr(p),29);
+            arm_write_register(p,rd, resultat);
+            if(s){
             	cmn_processing(p,rn,(val_sh+((get_bit(arm_read_cpsr(p),29)))));
 				}
 
@@ -272,12 +324,13 @@ void sbc_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 
 	//Rd := Rn - shifter_operand - NOT(Carry Flag)
 	uint32_t resultat;
-		
-		resultat= arm_read_usr_register(p,rn) - val_sh - (~(get_bit(arm_read_cpsr(p),29)));
-	            arm_write_usr_register(p,rd, resultat);
-	            if(resultat && s==1){
-	            	cmp_processing(p,rn,(val_sh-(~(get_bit(arm_read_cpsr(p),29)))));
-					}
+	int c = get_bit(arm_read_cpsr(p),29);
+	
+	resultat= arm_read_register(p,rn) - val_sh - !c;
+	arm_write_register(p,rd, resultat);
+	if(s){
+		cmp_processing(p,rn,(val_sh-(~(get_bit(arm_read_cpsr(p),29)))));
+	}
 }
 
 	
@@ -287,11 +340,15 @@ void rsc_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 
 	//Rd := shifter_operand - Rn - NOT(Carry Flag)
 	uint32_t resultat,valrn;
-	valrn=arm_read_usr_register(p,rn);
+	valrn=arm_read_register(p,rn);
+	int c = read_C(p);
 
-	resultat= val_sh - valrn - (~(get_bit(arm_read_cpsr(p),29)));
-	     arm_write_usr_register(p,rd, resultat);
-	     if(resultat && s==1){
+	resultat= val_sh - valrn - !c;
+	     arm_write_register(p,rd, resultat);
+	     
+	     printf("RESULTAT RSC processing = %d\n",resultat);
+	     
+	     if(s){
 	     	 maj_ZN(p,resultat);
 
 	     	 //indicateur C
@@ -316,10 +373,10 @@ void orr_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 	//Logical (inclusive) OR Rd := Rn OR shifter_operand
 	uint32_t resultat;
 
-	resultat= arm_read_usr_register(p,rn) | val_sh;
-	          arm_write_usr_register(p,rd, resultat);
+	resultat= arm_read_register(p,rn) | val_sh;
+	          arm_write_register(p,rd, resultat);
 	        
-	        if(resultat && s==1){
+	        if(s){
 	        	
 	        	maj_ZN(p,resultat);
              //The V flag and the rest of the CPSR are unaffected.
@@ -332,13 +389,14 @@ void mov_processing(arm_core p,uint8_t rd,uint32_t val_sh,  int s){
 	//Rd := shifter_operand (no first operand)
 	uint32_t resultat;
 	printf("val_sh mov processing = %d\n", val_sh);
-	        arm_write_usr_register(p,rd, val_sh);
-	        resultat=arm_read_usr_register(p,rd);
+	        arm_write_register(p,rd, val_sh);
+	        resultat=arm_read_register(p,rd);
+	        
 	        
 	        printf("result = %d\n",resultat);
 
 	        //si le registre destination est en mode user
-	        if(resultat && s==1){
+	        if(s){
 	        	
 	        	maj_ZN(p,resultat);
     
@@ -351,15 +409,19 @@ void bic_processing(arm_core p,uint8_t rn,uint8_t rd, uint32_t val_sh,  int s){
 
 	//Bit Clear Rd := Rn AND NOT(shifter_operand)
 	uint32_t resultat;
+	int c = read_C(p);
 
-	resultat= arm_read_usr_register(p,rn) & (~val_sh);
-	          arm_write_usr_register(p,rd, resultat);
+	printf("C before BIC processing = %d\n",c);
+	resultat= arm_read_register(p,rn) & (~val_sh);
+	          arm_write_register(p,rd, resultat);
 
 	          
-	        if(resultat && s==1){
+	        if(s){
 	        	
 	        	tst_processing(p,rn,(~val_sh));
 	}
+	c = read_C(p);
+	printf("C after BIC processing = %d\n",c);
 	
 }
 
@@ -475,16 +537,21 @@ Spec : Prends en argument l'instruction en 32 bits. Cette fonction traite
 **************************************************************************/
 
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
-    int rn, rd, opcode, cond, s;
-    uint32_t val_sh;
+    int rn, rd, opcode, cond, s, rotation;
+    uint32_t val_sh, imm;
     
     cond = get_bits(ins, 31, 28);
     opcode = get_bits(ins, 24, 21);
     rn = get_bits(ins, 19, 16);
     rd = get_bits(ins, 15, 12);
     s = get_bit(ins, 20);
-
-    val_sh = get_bits(ins, 11, 0);
+	
+	 rotation = get_bits(ins, 11, 8);
+    imm = get_bits(ins, 7, 0);
+    printf("Rotation = %d\n",rotation);
+    printf("Immediate = %d\n",imm);
+    val_sh = ror(imm, rotation);
+    printf("val_sh processing data = %d\n",val_sh);
     
     if(condition(p, cond)){
     	switch(opcode){
@@ -522,6 +589,8 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
     		
     	case 8 :
     		tst_processing(p, rn, val_sh);
+    		
+    		
     		break;
     		
     	case 9 :
