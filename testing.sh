@@ -23,7 +23,7 @@ else
 		-ex "inf reg" \
 		-ex "set logging off" \
 		-ex "continue" \
-		-ex "quit"
+		-ex "quit" &> /dev/null
 
 		> log_gdb.out
 		arm-none-eabi-gdb -ex "set pagination off" \
@@ -38,9 +38,11 @@ else
 		-ex "inf reg" \
 		-ex "set logging off" \
 		-ex "continue" \
-		-ex "quit"
+		-ex "quit" &> /dev/null
 
+		echo "--------------------{RESULT}--------------------"
 		echo "$(diff log_sim.out log_gdb.out)"
+		echo "------------------------------------------------"
 
 	else
 		echo "[Erreur] l'executable du simulateur n'est pas present dans le dossier courant."
