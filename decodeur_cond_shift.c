@@ -5,7 +5,13 @@
 #include "util.h"
 #include "debug.h"
 #include "decodeur_cond_shift.h"
-//
+
+/*************************************************************************
+Auteur : Bianca
+Date : 20/12/2017
+Spec : Les fonctions renvoient les valeurs de N, Z, C et V respectivement.
+**************************************************************************/
+
 int read_N(arm_core p){
 	uint32_t cprs = arm_read_cpsr(p);
 	
@@ -29,6 +35,14 @@ int read_V(arm_core p){
 	
 	return get_bit(cprs, 28);
 }
+
+
+/*************************************************************************
+Auteur : Bianca
+Date : 20/12/2017
+Spec : Prends en argument le condition. Si la condition est satisfiée, la 
+	fonction renvoie vrai, sinon faux. 
+**************************************************************************/
 
 int condition(arm_core p, uint8_t cond){
 	
@@ -181,7 +195,7 @@ le registre d'offset Rm re registre de shift Rs et le bit I qui determine
 si le shift est execute avec shift_imm (0) ou avec Rs (1). Renvois la
 valeur de Rm shiftee.
 **************************************************************************/
-int shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uint8_t I)
+uint32_t shift(arm_core p, uint8_t shift,uint8_t shift_imm, uint8_t Rm,uint8_t Rs,uint8_t I)
 {
 	int32_t Rm_value = arm_read_register(p,Rm);
 	uint32_t Rs_value;

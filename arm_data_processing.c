@@ -44,7 +44,7 @@ void maj_ZN(arm_core p,uint32_t resultat){
 }
 
 
-void mvn_processing(arm_core p,uint8_t rd, int val_sh,  int s){
+void mvn_processing(arm_core p,uint8_t rd, uint32_t val_sh,  int s){
 
 	//Move Not Rd := NOT shifter_operand (no first operand)
 
@@ -169,7 +169,7 @@ arm_write_cpsr(p, (arm_read_cpsr(p) & (~(1<<28))));
 	
 }
 
-void and_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh, int s){
+void and_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh, int s){
    
   //Rd := Rn AND shifter_operand
 	uint32_t resultat;
@@ -183,7 +183,7 @@ void and_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh, int s){
 
 }
 
-void sub_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
+void sub_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
     
     //Rd := Rn - shifter_operand
     uint32_t resultat;
@@ -194,7 +194,7 @@ void sub_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
 	}
 }
 
-void add_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
+void add_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 	
 	//Rd := Rn + shifter_operand
 	uint32_t resultat;
@@ -207,7 +207,7 @@ void add_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
 
 }
 
-void eor_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
+void eor_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 	
 	//Rd := Rn EOR shifter_operand
 
@@ -222,7 +222,7 @@ void eor_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
 }
 
 
-void rsb_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
+void rsb_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 
 	//Rd := shifter_operand - Rn
 
@@ -255,7 +255,7 @@ void rsb_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
 					}
 }
 
-void adc_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
+void adc_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 
 	//Rd := Rn + shifter_operand + Carry Flag
 	uint32_t resultat;
@@ -268,7 +268,7 @@ void adc_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
 
 }
 
-void sbc_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
+void sbc_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 
 	//Rd := Rn - shifter_operand - NOT(Carry Flag)
 	uint32_t resultat;
@@ -283,7 +283,7 @@ void sbc_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
 	
 
 
-void rsc_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
+void rsc_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 
 	//Rd := shifter_operand - Rn - NOT(Carry Flag)
 	uint32_t resultat,valrn;
@@ -311,7 +311,7 @@ void rsc_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
 							}
 }
 
-void orr_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
+void orr_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 
 	//Logical (inclusive) OR Rd := Rn OR shifter_operand
 	uint32_t resultat;
@@ -327,7 +327,7 @@ void orr_processing(arm_core p,uint8_t rn,uint8_t rd,int val_sh,  int s){
 		}
 }
 
-void mov_processing(arm_core p,uint8_t rd,int val_sh,  int s){
+void mov_processing(arm_core p,uint8_t rd,uint32_t val_sh,  int s){
 	
 	//Rd := shifter_operand (no first operand)
 	uint32_t resultat;
@@ -347,7 +347,7 @@ void mov_processing(arm_core p,uint8_t rd,int val_sh,  int s){
 
 }
 
-void bic_processing(arm_core p,uint8_t rn,uint8_t rd, int val_sh,  int s){
+void bic_processing(arm_core p,uint8_t rn,uint8_t rd, uint32_t val_sh,  int s){
 
 	//Bit Clear Rd := Rn AND NOT(shifter_operand)
 	uint32_t resultat;
@@ -363,21 +363,28 @@ void bic_processing(arm_core p,uint8_t rn,uint8_t rd, int val_sh,  int s){
 	
 }
 
-/*****************************************************/
 
-/* Decoding functions for different classes of instructions */
+/*************************************************************************
+Auteur : Bianca
+Date : 19/12/2017
+Spec : Prends en argument l'instruction en 32 bits. Cette fonction traite 
+	les instructions sans les valeurs immediate, donc avec que les registres.
+	La fonction decoupe l'instruction et appelle les fonctions necessaire 
+	par rapport a son op code. Les fonctions sont appellées que si la 
+	condition est satisfiée.
+**************************************************************************/
+
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
-   int cond, rn, rd, opcode, val_sh, s;
+   int cond, rn, rd, opcode, s;
    uint8_t sh, rm, shift_imm, rs, I;
+   uint32_t val_sh;
     
     cond = get_bits(ins, 31, 28);
     opcode = get_bits(ins, 24, 21);
     s = get_bit(ins, 20);
     rn = get_bits(ins, 19, 16);
     rd = get_bits(ins, 15, 12);
-        
-    //shift_operands
-    //shift(p,shift_codeOp,shift_imm,Rm,0,0)
+
     I = get_bit(ins,4);
     shift_imm = get_bits(ins, 11, 7);
     rs = get_bits(ins, 11, 8);
@@ -458,8 +465,18 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
    return 0;
 }
 
+/*************************************************************************
+Auteur : Bianca
+Date : 19/12/2017
+Spec : Prends en argument l'instruction en 32 bits. Cette fonction traite 
+	les instructions avec les valeurs immediate. La fonction decoupe 
+	l'instruction et appelle les fonctions necessaire par rapport a son op 
+	code. Les fonctions sont appellées que si la condition est satisfiée.
+**************************************************************************/
+
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
-    int rn, rd, opcode, val_sh, cond, s;
+    int rn, rd, opcode, cond, s;
+    uint32_t val_sh;
     
     cond = get_bits(ins, 31, 28);
     opcode = get_bits(ins, 24, 21);
