@@ -91,7 +91,6 @@ Une plage de mémoire est affecté par les valeurs stocké dans les registres.
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	printf("Debut de la fonction Load_Store_Multiple\n");
 	if(condition(p,get_bits(ins,31,28))){
-		printf("Condition passé\n");
 		uint32_t adr,value = 0;
 		int L = get_bit(ins,20);
 		int U = get_bit(ins,23);
@@ -99,6 +98,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 		int W = get_bit(ins,21);
 		int nbreg = 0;
 	    if(L){ //Cas du load
+	    	printf("Cas du Load\n");
 	    	adr = arm_read_register(p,get_bits(ins,19,16));
 	    	if(U){ // U == 1 , on remonte les adresses
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
@@ -107,6 +107,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 		    	for(int i=0;i<=15;i++){
 		    		if(get_bit(ins,i)){
 		    			arm_read_word(p,adr,&value);
+		    			printf("Registre %d prend la valeur %0x \n",i,value );
 		    			arm_write_register(p,i,value);
 		    			adr+=4;
 		    			nbreg++;
@@ -128,6 +129,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 		    	for(int i=0;i<=15;i++){
 		    		if(get_bit(ins,i)){
 		    			arm_read_word(p,adr,&value);
+		    			printf("Registre %d prend la valeur %0x \n",i,value );
 		    			arm_write_register(p,i,value);
 		    			adr+=4;
 		    		}
@@ -138,6 +140,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 	    	}
 	    	return 0;
 	    }else{ // Cas du store
+	    	printf("Cas du Store\n");
 	    	adr = arm_read_register(p,get_bits(ins,19,16));
 	    	if(U){ // U == 1 , on remonte les adresses
 	    		if(P){ // P == 1, la premiere valeur est en dehors de la range
@@ -146,6 +149,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 		    	for(int i=0;i<=15;i++){
 		    		if(get_bit(ins,i)){
 		    			arm_write_word(p,adr,arm_read_register(p,i));
+		    			printf("On ecrit a l'adresse : %0x, la valeur : %0x \n",adr, arm_read_register(p,i));
 		    			adr+=4;
 		    			nbreg++;
 		    		}
@@ -166,6 +170,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 		    	for(int i=0;i<=15;i++){
 		    		if(get_bit(ins,i)){
 		    			arm_write_word(p,adr,arm_read_register(p,i));
+		    			printf("On ecrit a l'adresse : %0x, la valeur : %0x \n",adr, arm_read_register(p,i));
 		    			adr+=4;
 		    		}
 		    	}
