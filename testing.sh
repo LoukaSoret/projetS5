@@ -8,6 +8,7 @@ then
 	echo "[Erreur] aucun argument."
 else
 	filename=$1
+
 	baseFilename=$(basename $filename)
 	# Recupere le numero de la derniere ligne : swi 0x123456
 	lastLine=$(grep -n 'swi 0x123456' 'Examples/'$baseFilename'.s' | awk -F ":" '{print $1}')	
@@ -43,6 +44,13 @@ else
 		-ex "continue" \
 		-ex "quit" &> /dev/null
 
+		
+		echo "---------------------{GDB}----------------------"
+		echo "$(<log_gdb.out)"
+		echo "------------------------------------------------"
+		echo "---------------------{SIM}----------------------"
+		echo "$(<log_sim.out)"
+		echo "------------------------------------------------"
 		echo "--------------------{RESULT}--------------------"
 		echo "$(diff log_sim.out log_gdb.out)"
 		echo "------------------------------------------------"
@@ -51,4 +59,3 @@ else
 		echo "[Erreur] l'executable du simulateur n'est pas present dans le dossier courant."
 	fi
 fi
-
