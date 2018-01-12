@@ -37,9 +37,9 @@ void arm_exception(arm_core p, unsigned char exception) {
 		arm_write_cpsr(p, 0x1d3 | Exception_bit_9);
 		arm_write_usr_register(p, 15, 0);
 	}
+	/*
 	else if (exception == UNDEFINED_INSTRUCTION){
 		arm_write_cpsr(p, 0x5d | Exception_bit_9); // ???
-		arm_write_spsr(p,p->)
 		arm_write_usr_register(p, 15, 4);
 	}
 	else if (exception == SOFTWARE_INTERRUPT){
@@ -60,4 +60,5 @@ void arm_exception(arm_core p, unsigned char exception) {
 	else{
 
 	}
+	*/
 }
