@@ -539,7 +539,7 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
 	
 	 rotation = get_bits(ins, 11, 8);
     imm = get_bits(ins, 7, 0);
-    val_sh = ror(imm, rotation);
+    val_sh = ror(imm, 2*rotation);
     
     if(condition(p, cond)){
     	switch(opcode){
