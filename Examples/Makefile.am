@@ -6,7 +6,10 @@ AM_LDFLAGS=-nostdlib -T $(srcdir)/linker_script -n --entry main
 AM_LDFLAGS+=-Wl,-EB
 
 if HAVE_ARM_COMPILER
-noinst_PROGRAMS=example1 example2 example3 example4 example5 insertion_sort example_Kirill_Load_Multiples example_Kirill_Load_Multiples_ldmda example_Kirill_Load_Multiples_ldmib example_Kirill_Load_Multiples_ldmdb example_STMIA example_STMIB example_STMDA example_STMDB
+noinst_PROGRAMS=example1 example2 example3 example4 example5 insertion_sort \
+example_Kirill_Load_Multiples example_Kirill_Load_Multiples_ldmda \
+example_Kirill_Load_Multiples_ldmib example_Kirill_Load_Multiples_ldmdb example_STMIA \
+example_STMIB example_STMDA example_STMDB 
 
 all-am: $(PROGS)
 endif
