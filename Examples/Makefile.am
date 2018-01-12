@@ -10,7 +10,7 @@ noinst_PROGRAMS=example1 example2 example3 example4 example5 insertion_sort \
 example_Kirill_Load_Multiples example_Kirill_Load_Multiples_ldmda \
 example_Kirill_Load_Multiples_ldmib example_Kirill_Load_Multiples_ldmdb example_STMIA \
 example_STMIB example_STMDA example_STMDB test_tst test_teq test_add_adc test_and_orr_eor \
-test_bic test_cmn test_cmp test_mov test_mvn test_rsb_rsc test_sub_sbc
+test_bic test_cmn test_cmp test_mov test_mvn test_rsb_rsc test_sub_sbc example6
 
 all-am: $(PROGS)
 endif
@@ -20,6 +20,7 @@ example2_SOURCES=example2.s
 example3_SOURCES=example3.s
 example4_SOURCES=example4.s
 example5_SOURCES=example5.s
+example6_SOURCES=example6.s
 example_Kirill_Load_Multiples_SOURCES=example_Kirill_Load_Multiples.s
 example_Kirill_Load_Multiples_ldmda_SOURCES=example_Kirill_Load_Multiples_ldmda.s
 example_Kirill_Load_Multiples_ldmib_SOURCES=example_Kirill_Load_Multiples_ldmib.s
