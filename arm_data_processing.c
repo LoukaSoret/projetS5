@@ -320,7 +320,7 @@ void adc_processing(arm_core p,uint8_t rn,uint8_t rd,uint32_t val_sh,  int s){
 	uint32_t resultat;
 	int c = read_C(p);
 
-	resultat= arm_read_register(p,rn) + val_sh + get_bit(arm_read_cpsr(p),29);
+	resultat= arm_read_register(p,rn) + val_sh + c;
    arm_write_register(p,rd, resultat);
    
    if(s){

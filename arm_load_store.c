@@ -1,3 +1,4 @@
+
 /*
 Armator - simulateur de jeu d'instruction ARMv5T à but pédagogique
 Copyright (C) 2011 Guillaume Huard
@@ -40,9 +41,10 @@ l'etat des registres et de la memoire en fonction de
 l'instruction par effets de bords.
 *************************************************************/
 int arm_load_store(arm_core p, uint32_t ins) {
-	uint8_t Rn,Rd,shift_amount,shift_codeOp,Rm,P,U,I,B,W,L,codeOp;;
+	uint8_t Rn,Rd,shift_amount,shift_codeOp,Rm,P,U,I,B,W,L,codeOp,cond;
     uint16_t immediate;
 
+    cond = get_bits(ins,31,28);
     Rn = get_bits(ins,19,16); // Address
     Rd = get_bits(ins,15,12); // content to be loaded or stored
     I = get_bit(ins,25); //immediate (0) or register (1) offset
@@ -62,7 +64,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
     codeOp = get_bits(ins,27,26);
 
     /* Condition Test */
-    if(1 /*condition(p,ins)*/){
+    if(condition(p,cond)){
     	/* Load and store for bytes and words */
     	if(codeOp){
     		if(L){
