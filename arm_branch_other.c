@@ -56,7 +56,7 @@ int arm_branch(arm_core p, uint32_t ins) {
         printf("Valeur de complement a 2 : %0x \n",adr );
         int L = get_bit(ins,24); 
         if(L){ // Si L est == 1 alors on sauvegarde la valuer de PC dans R14
-            arm_write_register(p,14,pc);
+            arm_write_register(p,14,pc-4);
         }
         if(neg){
             arm_write_register(p,15,pc-adr);
